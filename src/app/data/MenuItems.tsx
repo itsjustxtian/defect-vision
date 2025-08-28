@@ -10,7 +10,7 @@ import {
 export const items = [
 	{
 		title: 'Home',
-		url: '#',
+		url: '/',
 		icon: Home,
 	},
 	{
@@ -32,16 +32,19 @@ export const items = [
 
 export const QuickActionItems = [
 	{
+		id: 1,
 		title: 'Start Scanning...',
-		url: '#',
+		url: '/start-scanning',
 		icon: ScanEye,
 	},
 	{
+		id: 2,
 		title: 'View Reports...',
 		url: '#',
 		icon: ScrollText,
 	},
 	{
+		id: 3,
 		title: 'View History...',
 		url: '#',
 		icon: History,

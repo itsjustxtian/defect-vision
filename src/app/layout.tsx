@@ -4,8 +4,11 @@ import './globals.css';
 import RootLayoutClient from './RootLayoutClient';
 
 export const metadata: Metadata = {
-	title: { default: 'BillShare', template: '%s | Bill Share' },
-	description: 'Organize your bills easily.',
+	title: {
+		default: 'DefectVision',
+		template: '%s | DefectVision',
+	},
+	description: 'An AI-Assisted Defect Detection Application for Motherboards',
 };
 
 const inter = Inter({
