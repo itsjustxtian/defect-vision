@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import RootLayoutClient from './RootLayoutClient';
+import { ThemeProvider } from './components/theme-provider';
 
 export const metadata: Metadata = {
 	title: {
@@ -22,9 +23,16 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body className={`${inter.className} antialiased flex`}>
-				<RootLayoutClient>{children}</RootLayoutClient>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<RootLayoutClient>{children}</RootLayoutClient>
+				</ThemeProvider>
 			</body>
 		</html>
 	);
