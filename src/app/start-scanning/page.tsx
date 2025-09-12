@@ -5,6 +5,15 @@ import IPCameraStream from '../components/IPCameraStream';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
+type ApiResponse = {
+	status: string;
+	message: string;
+	output?: string;
+	inserted_id?: string;
+	details?: string;
+	error?: string;
+};
+
 const Page = () => {
 	const [cameraIP, setCameraIP] = useState<string>('');
 	const [cameraPort, setCameraPort] = useState<string>('');
@@ -21,9 +30,46 @@ const Page = () => {
 		}
 	};
 
+	const [loading, setLoading] = useState(false);
+	const [response, setResponse] = useState<ApiResponse | null>(null);
+	const [piNgrokUrl, setPiNgrokUrl] = useState('');
+	const [authToken, setAuthToken] = useState('your-very-secret-token');
+
+	const handleClick = async () => {
+		setLoading(true);
+		setResponse(null);
+
+		// Call the local Next.js API route, passing the URL and token in the body.
+		try {
+			const res = await fetch('/api/run_pi_script', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				// Send the user-provided URL and token to the API route.
+				body: JSON.stringify({ piNgrokUrl, authToken }),
+			});
+
+			const data = await res.json();
+			setResponse(data);
+			console.log(data);
+		} catch (error: unknown) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			setResponse({
+				status: 'error',
+				message: 'Failed to connect to API route.',
+				details: errorMessage,
+			});
+			console.error('Failed to fetch:', error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
-		<div className="min-h-[calc(100vh-3.75rem)] p-10 flex flex-col md:flex-row gap-8">
-			<div className="flex-1 flex flex-col gap-4 justify-center items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md">
+		<div className="min-h-[calc(100vh-3.75rem)] p-10 flex flex-col md:flex-row justify-center items-center gap-8">
+			{/*<div className="flex-1 flex flex-col gap-4 justify-center items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md">
 				<h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
 					Connect to IP Camera
 				</h2>
@@ -77,6 +123,49 @@ const Page = () => {
 					<button className="bg-blue-600 text-white rounded-md hover:bg-blue-700 px-6 py-2 transition-all duration-150 shadow-lg">
 						Scan
 					</button>
+				)}
+			</div>*/}
+			<div className="bg-white/5 p-8 rounded-lg shadow-lg max-w-lg w-full text-center">
+				<h1 className="text-3xl font-bold mb-4">Control Your Raspberry Pi</h1>
+				<p className="text-gray-600 mb-6">
+					Enter the ngrok URL and your auth token to connect.
+				</p>
+				<div className="mb-4">
+					<input
+						type="text"
+						placeholder="Enter ngrok URL (e.g., https://abcde1234.ngrok-free.app)"
+						value={piNgrokUrl}
+						onChange={(e) => setPiNgrokUrl(e.target.value)}
+						className="w-full px-4 py-2 border rounded-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<div className="mb-6">
+					<input
+						type="password"
+						placeholder="Enter your auth token"
+						value={authToken}
+						onChange={(e) => setAuthToken(e.target.value)}
+						className="w-full px-4 py-2 border rounded-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<button
+					onClick={handleClick}
+					disabled={loading || !piNgrokUrl || !authToken}
+					className={`px-6 py-3 rounded-full text-white font-semibold transition-colors duration-200 ${
+						loading || !piNgrokUrl || !authToken
+							? 'bg-gray-400 cursor-not-allowed'
+							: 'bg-blue-600 hover:bg-blue-700'
+					}`}
+				>
+					{loading ? 'Sending Command...' : 'Run Pi Script'}
+				</button>
+				{response && (
+					<div className="mt-6 p-4 rounded-md text-sm border">
+						<h3 className="font-semibold text-left mb-2">Response from Pi:</h3>
+						<pre className="whitespace-pre-wrap text-left text-gray-800">
+							{JSON.stringify(response, null, 2)}
+						</pre>
+					</div>
 				)}
 			</div>
 		</div>

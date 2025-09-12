@@ -15,12 +15,12 @@ export const items = [
 	},
 	{
 		title: 'Scan',
-		url: '#',
+		url: '/start-scanning',
 		icon: ScanEye,
 	},
 	{
 		title: 'Reports',
-		url: '#',
+		url: '/reports',
 		icon: ScrollText,
 	},
 	{
@@ -40,7 +40,7 @@ export const QuickActionItems = [
 	{
 		id: 2,
 		title: 'View Reports...',
-		url: '#',
+		url: '/reports',
 		icon: ScrollText,
 	},
 	{

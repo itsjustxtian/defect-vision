@@ -28,47 +28,53 @@ const MiniDataTable = () => {
 		.slice(0, 5);
 
 	return (
-		<Table>
-			<TableCaption>A list of your recent scans.</TableCaption>
-			<TableHeader>
-				<TableRow>
-					<TableHead className="w-[100px]">Date</TableHead>
-					<TableHead>Defect Count</TableHead>
-					<TableHead>Detected Classes</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>
-				{/* Check if the sorted array is empty */}
-				{mostRecentScans.length === 0 ? (
+		<div className="bg-black/20 p-6">
+			<Table>
+				<TableCaption>A list of your recent scans.</TableCaption>
+				<TableHeader>
 					<TableRow>
-						<TableCell colSpan={3} className="h-24 text-center">
-							No recent scans.
-						</TableCell>
+						<TableHead className="w-[100px]">Date</TableHead>
+						<TableHead>Defect Count</TableHead>
+						<TableHead>Detected Classes</TableHead>
 					</TableRow>
-				) : (
-					// If there is data, map over it to render the rows
-					mostRecentScans.map((scan, index) => {
-						const defectClasses = scan.predictions.predictions.map(
-							(prediction) => prediction.class
-						);
-						const uniqueDefectClasses = [...new Set(defectClasses)].join(', ');
+				</TableHeader>
+				<TableBody>
+					{/* Check if the sorted array is empty */}
+					{mostRecentScans.length === 0 ? (
+						<TableRow>
+							<TableCell colSpan={3} className="h-24 text-center">
+								No recent scans.
+							</TableCell>
+						</TableRow>
+					) : (
+						// If there is data, map over it to render the rows
+						mostRecentScans.map((scan, index) => {
+							const defectClasses = scan.predictions.predictions.map(
+								(prediction) => prediction.class
+							);
+							const uniqueDefectClasses = [...new Set(defectClasses)].join(
+								', '
+							);
 
-						return (
-							<TableRow key={index}>
-								<TableCell className="font-medium">
-									{format(
-										new Date(scan.output_image.video_metadata.frame_timestamp),
-										'MM/dd/yyyy'
-									)}
-								</TableCell>
-								<TableCell>{scan.count_objects}</TableCell>
-								<TableCell>{uniqueDefectClasses}</TableCell>
-							</TableRow>
-						);
-					})
-				)}
-			</TableBody>
-		</Table>
+							return (
+								<TableRow key={index}>
+									<TableCell className="font-medium">
+										{format(
+											new Date(
+												scan.output_image.video_metadata.frame_timestamp
+											),
+											'MM/dd/yyyy'
+										)}
+									</TableCell>
+									<TableCell>{scan.count_objects}</TableCell>
+									<TableCell>{uniqueDefectClasses}</TableCell>
+								</TableRow>
+							);
+						})
+					)}
+				</TableBody>
+			</Table>
+		</div>
 	);
 };
 
