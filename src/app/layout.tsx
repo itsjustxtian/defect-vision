@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import RootLayoutClient from './RootLayoutClient';
-import { ThemeProvider } from './components/theme-provider';
+import { ThemeProvider } from './(main)/components/theme-provider';
 
 export const metadata: Metadata = {
 	title: {
@@ -24,14 +23,14 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={`${inter.className} antialiased flex`}>
+			<body className={`${inter.className} antialiased`}>
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
 				>
-					<RootLayoutClient>{children}</RootLayoutClient>
+					{children}
 				</ThemeProvider>
 			</body>
 		</html>
