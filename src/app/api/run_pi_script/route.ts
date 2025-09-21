@@ -1,5 +1,5 @@
 export async function POST(req: Request) {
-	const { piNgrokUrl, authToken } = await req.json();
+	const { piNgrokUrl, authToken, email } = await req.json();
 
 	if (!piNgrokUrl || !authToken) {
 		return new Response(
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${authToken}`,
 			},
+			body: JSON.stringify({ email }), // ✅ send email to Pi
 		});
 
 		const data = await res.json();

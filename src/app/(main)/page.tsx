@@ -1,7 +1,11 @@
 import { ScanEye } from 'lucide-react';
 import { QuickActionItems } from './data/MenuItems';
-import Image from 'next/image';
 import MiniDataTable from './components/MiniDataTable';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+	title: 'Dashboard',
+};
 
 export default function Home() {
 	return (

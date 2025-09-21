@@ -29,7 +29,9 @@
 		".next/types/**/*.ts",
 		"src/app/models/ScanResult.js",
 		"src/app/api/scans/route.js",
-		"src/lib/mongodb.js"
+		"src/lib/mongodb.js",
+		"src/lib/sessions.js",
+		"src/app/api/user/route.js"
 	],
 	"exclude": ["node_modules"]
 }

@@ -5,6 +5,7 @@ import {
 	ScrollText,
 	Search,
 	Settings,
+	User2,
 } from 'lucide-react';
 
 export const items = [
@@ -48,5 +49,14 @@ export const QuickActionItems = [
 		title: 'View History...',
 		url: '#',
 		icon: History,
+	},
+];
+
+export const FooterItems = [
+	{
+		id: 1,
+		title: 'Username',
+		url: '#',
+		icon: User2,
 	},
 ];

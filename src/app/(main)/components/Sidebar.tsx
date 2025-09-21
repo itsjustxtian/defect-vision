@@ -1,7 +1,8 @@
-import { Cpu } from 'lucide-react';
+import { ChevronUp, Cpu, User2 } from 'lucide-react';
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
@@ -10,8 +11,6 @@ import {
 	SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { items } from '../data/MenuItems';
-
-// Menu items.
 
 export function AppSidebar() {
 	return (

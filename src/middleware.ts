@@ -1,40 +1,40 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { decrypt } from '@/lib/sessions'; // Import the decrypt function
 
-export function middleware(request: NextRequest) {
-	const protectedPaths = [
-		'/dashboard',
-		'/profile',
-		'/start-scanning',
-		'/reports',
-	];
-	const publicPaths = ['/login'];
+export async function middleware(request: NextRequest) {
+	const protectedPaths = ['/', '/profile', '/start-scanning', '/reports'];
 
 	const { pathname } = request.nextUrl;
 
-	const isAuthenticated = request.cookies.has('token');
+	const session = request.cookies.get('session')?.value;
+	const sessionPayload = await decrypt(session);
 
+	const isAuthenticated = !!sessionPayload;
+
+	// Case 1: Handle unauthenticated access to protected paths
 	if (!isAuthenticated) {
-		if (pathname === '/') {
-			return NextResponse.rewrite(new URL('/login', request.url));
-		}
-
-		if (protectedPaths.some((path) => pathname.startsWith(path))) {
+		if (protectedPaths.some((path) => pathname === path)) {
 			const loginUrl = new URL('/login', request.url);
 			loginUrl.searchParams.set('redirect_url', pathname);
 			return NextResponse.redirect(loginUrl);
 		}
 	}
 
+	// Case 2: Handle authenticated access to public paths and root
 	if (isAuthenticated) {
-		if (publicPaths.includes(pathname) || pathname === '/') {
-			return NextResponse.redirect(new URL('/dashboard', request.url));
+		if (pathname === '/login') {
+			// Delete the session cookie here to fix the redirect loop
+			const response = NextResponse.redirect(new URL('/', request.url));
+			response.cookies.set('session', '', { expires: new Date(0) });
+			return response;
 		}
 	}
 
+	// Allow all other requests to proceed
 	return NextResponse.next();
 }
 
 export const config = {
-	matcher: ['/', '/:path*', '/dashboard/:path*', '/profile', '/login'],
+	matcher: ['/', '/:path*'],
 };
