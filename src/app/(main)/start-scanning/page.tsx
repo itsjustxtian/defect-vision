@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { UserData } from '@/app/(auth)/actions';
+import { CircleAlert, CircleCheckBig } from 'lucide-react';
+import { TailChase } from 'ldrs/react';
+import 'ldrs/react/TailChase.css';
+import ScanSettings from './ScanSettings';
 
 type ApiResponse = {
 	status: string;
@@ -22,17 +26,21 @@ const Page = () => {
 		'v6Rl8fhspdf8QGeQAhBwhgji2x4Kf50r'
 	);
 	const [user, setUser] = useState<{ email: string } | null>(null);
+	const [ngrokStatus, setNgrokStatus] = useState('waiting');
 
 	useEffect(() => {
+		//gets the user details on render
 		const fetchUser = async () => {
 			const res = await fetch('/api/user');
 			const data = await res.json();
 			setUser(data);
 		};
 		fetchUser();
+		checkNgrokStatus();
 	}, []);
 
 	const handleClick = async () => {
+		//handles sending instructions to the raspberry pi to initiate scanning
 		setLoading(true);
 		setResponse(null);
 
@@ -64,9 +72,8 @@ const Page = () => {
 		}
 	};
 
-	const [ngrokStatus, setNgrokStatus] = useState<string | null>(null);
-
 	const checkNgrokStatus = async () => {
+		setNgrokStatus('waiting');
 		try {
 			const res = await fetch('/api/check_ngrok_status', {
 				method: 'POST',
@@ -75,57 +82,111 @@ const Page = () => {
 			});
 
 			const data = await res.json();
-			setNgrokStatus(
-				data.status === 'active'
-					? '🟢 Pi is online!'
-					: data.status === 'inactive'
-					? '🔴 Pi is offline.'
-					: '⚠️ Unexpected response.'
-			);
+			setNgrokStatus(data.status === 'active' ? 'active' : 'inactive');
+			console.log(data);
 		} catch (error) {
 			setNgrokStatus('⚠️ Unable to reach Pi.');
 			console.error('Error checking ngrok status:', error);
 		}
 	};
 
+	useEffect(() => {
+		const intervalId = setInterval(() => {
+			checkNgrokStatus();
+		}, 600000);
+
+		return () => clearInterval(intervalId);
+	}, [piNgrokUrl]);
+
 	return (
-		<div className="min-h-[calc(100vh-3.75rem)] p-10 flex flex-col md:flex-row justify-center items-center gap-8">
-			<div className="bg-white/5 p-8 rounded-lg shadow-lg max-w-lg w-full text-center">
-				<h1 className="text-3xl font-bold mb-4">Control Your Raspberry Pi</h1>
-				<p className="text-gray-600 mb-6">
-					Enter the ngrok URL and your auth token to connect.
-				</p>
-				<button
-					onClick={handleClick}
-					disabled={loading || !piNgrokUrl || !authToken}
-					className={`px-6 py-3 rounded-full text-white font-semibold transition-colors duration-200 ${
-						loading || !piNgrokUrl || !authToken
-							? 'bg-gray-400 cursor-not-allowed'
-							: 'bg-blue-600 hover:bg-blue-700'
-					}`}
-				>
-					{loading ? 'Sending Command...' : 'Run Pi Script'}
-				</button>
-				{response && (
-					<div className="mt-6 p-4 rounded-md text-sm border">
-						<h3 className="font-semibold text-left mb-2">Response from Pi:</h3>
-						<pre className="whitespace-pre-wrap text-left text-gray-800">
-							{JSON.stringify(response, null, 2)}
-						</pre>
-					</div>
-				)}
+		<div className="p-10 flex flex-col min-h-[calc(100vh-3.75rem)]">
+			<div className="flex justify-end py-6">
 				<button
 					onClick={checkNgrokStatus}
-					className="px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+					title="sdfsdf"
+					className="cursor-pointer hover:scale-105 transition-all duration-250 flex justify-center items-center gap-2 px-6 py-2 border-2 border-primary rounded-full w-40"
 				>
-					Check Pi Status
+					{ngrokStatus == 'active' ? (
+						<div className="flex justify-center items-center gap-2">
+							<span className="w-2 h-2 bg-green-700 rounded-full"></span>
+							<p>Connected</p>
+						</div>
+					) : ngrokStatus == 'inactive' ? (
+						<div className="flex justify-center items-center gap-2">
+							<span className="w-2 h-2 bg-red-700 rounded-full"></span>
+							<p>Disconnected</p>
+						</div>
+					) : (
+						<div className="flex">
+							<div className="flex justify-center items-center gap-2">
+								<span className="w-2 h-2 bg-amber-300 rounded-full"></span>
+								<p>Connecting...</p>
+							</div>
+						</div>
+					)}
 				</button>
-
-				{ngrokStatus && (
-					<div className="mt-4 text-sm text-center text-gray-800">
-						{ngrokStatus}
+			</div>
+			<div className="flex-1 flex justify-center items-stretch">
+				<div
+					id="controls"
+					className="w-1/2 flex flex-col py-8 px-20 text-left bg-foreground/5 rounded-lg shadow-lg justify-center"
+				>
+					<h1 className="text-3xl font-bold mb-4">Start Scanning</h1>
+					<p className="text-gray-600 mb-6">
+						Place your motherboard inside the box and start scanning below or
+						adjust your settings.
+					</p>
+					<div className="flex gap-2">
+						<button
+							onClick={handleClick}
+							disabled={
+								loading ||
+								!piNgrokUrl ||
+								!authToken ||
+								ngrokStatus == 'inactive'
+							}
+							className={`px-6 py-3 w-full rounded-full text-white font-semibold transition-colors duration-200 ${
+								loading ||
+								!piNgrokUrl ||
+								!authToken ||
+								ngrokStatus == 'inactive' ||
+								'waiting'
+									? 'bg-gray-400 cursor-not-allowed'
+									: 'bg-blue-600 hover:bg-blue-700'
+							}`}
+							title={`${
+								!piNgrokUrl
+									? "Ngrok URL is missing. Can't connect to the raspberry pi."
+									: !authToken
+									? "Authorization token is missing. Can't connect to the raspberry pi."
+									: ngrokStatus == 'inactive' || 'waiting'
+									? 'Disconnected from the scanner. Cannot proceed.'
+									: 'Error detected. Unable to scan.'
+							}`}
+						>
+							{loading ? 'Sending Command...' : 'Run Pi Script'}
+						</button>
+						<ScanSettings
+							piNgrokUrl={piNgrokUrl}
+							setPiNgrokUrl={setPiNgrokUrl}
+							authToken={authToken}
+							setAuthToken={setAuthToken}
+						/>
 					</div>
-				)}
+					{response && (
+						<div className="mt-6 p-4 rounded-md text-sm border">
+							<h3 className="font-semibold text-left mb-2">
+								Response from Pi:
+							</h3>
+							<pre className="whitespace-pre-wrap text-left text-gray-800">
+								{JSON.stringify(response, null, 2)}
+							</pre>
+						</div>
+					)}
+				</div>
+				<div id="results" className="w-1/2 flex">
+					Hello
+				</div>
 			</div>
 		</div>
 	);
