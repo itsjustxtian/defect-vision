@@ -93,7 +93,18 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 	},
 	{
 		accessorKey: 'timestamp',
-		header: 'Date',
+		header: ({ column }) => {
+			return (
+				<button
+					className="flex items-center cursor-pointer"
+					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+				>
+					Date
+					<ArrowUpDown className="ml-2 h-4 w-4" />
+				</button>
+			);
+		},
+
 		cell: ({ row }) => {
 			const date = new Date(row.original.timestamp);
 			return date.toLocaleDateString();
@@ -101,7 +112,17 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 	},
 	{
 		accessorKey: 'count_objects',
-		header: 'No. of Defects',
+		header: ({ column }) => {
+			return (
+				<button
+					className="flex items-center cursor-pointer"
+					onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+				>
+					No. of Defects
+					<ArrowUpDown className="ml-2 h-4 w-4" />
+				</button>
+			);
+		},
 	},
 	{
 		accessorKey: 'predictions.predictions', // Correct accessor for the array
