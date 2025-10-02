@@ -20,27 +20,19 @@ interface UserData {
 	email: string;
 }
 
+interface NavBarProps {
+	onMenuClick: () => void;
+	isSidebarOpen: boolean;
+	user: UserData | null; // The user data is now part of the main props object
+}
+
 export default function NavBar({
 	onMenuClick,
 	isSidebarOpen,
-}: {
-	onMenuClick: () => void;
-	isSidebarOpen: boolean;
-}) {
-	const [user, setUser] = useState<UserData | null>(null);
-
-	useEffect(() => {
-		const fetchUser = async () => {
-			const res = await fetch('/api/user');
-			const data = await res.json();
-			console.log('Fetched user:', data);
-			setUser(data);
-		};
-		fetchUser();
-	}, []);
-
+	user,
+}: NavBarProps) {
 	return (
-		<div className="sticky top-0 w-full h-15 bg-transparent flex items-center justify-between px-5">
+		<div className="sticky top-0 w-full h-15 bg-transparent flex items-center justify-between px-5 shadow-md">
 			<button className="cursor-pointer" onClick={onMenuClick}>
 				<Menu />
 			</button>

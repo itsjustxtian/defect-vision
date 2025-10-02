@@ -1,40 +1,68 @@
-'use client';
+import { ReactNode } from 'react';
+import LayoutClientWrapper from './LayoutClientWrapper';
+import { cookies } from 'next/headers';
+import dbConnect from '@/lib/dbConnect';
+import User from '@/app/models/User';
+import { decrypt } from '@/lib/sessions';
+import mongoose from 'mongoose';
 
-import { useState, ReactNode } from 'react';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AppSidebar } from './components/Sidebar';
-import SidebarMobile from './components/SidebarMobile';
-import { useIsMobile } from '@/hooks/use-mobile';
-import NavBar from './components/NavBar';
-import Footer from './components/Footer';
+interface UserData {
+	firstName: string;
+	lastName: string;
+	email: string;
+}
 
-export default function MainLayout({ children }: { children: ReactNode }) {
-	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-	const isMobile = useIsMobile();
+async function getServerUser(): Promise<UserData | null> {
+	try {
+		const cookieStore = await cookies(); // Server component utility
+		const session = cookieStore.get('session')?.value;
+		if (!session) {
+			// console.log("No session found."); // Optional: for debugging
+			return null; // Return null if user is not authenticated
+		}
 
-	const toggleSidebar = () => {
-		setIsSidebarOpen(!isSidebarOpen);
-	};
+		const payload = await decrypt(session);
+		if (!payload?.userId) {
+			// console.log("Invalid session payload."); // Optional: for debugging
+			return null;
+		}
 
-	return (
-		<>
-			<SidebarProvider open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-				{!isMobile ? (
-					<AppSidebar />
-				) : (
-					<SidebarMobile
-						isSidebarOpen={isSidebarOpen}
-						onMenuClick={toggleSidebar}
-					/>
-				)}
-				<div className="w-full">
-					<NavBar onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-					<div className="main-content-container">
-						<main className="page-content">{children}</main>
-					</div>
-					<Footer />
-				</div>
-			</SidebarProvider>
-		</>
-	);
+		const idString =
+			typeof payload.userId === 'string'
+				? payload.userId
+				: String(payload.userId);
+
+		if (!mongoose.Types.ObjectId.isValid(idString)) {
+			// console.log("Invalid userId format."); // Optional: for debugging
+			return null;
+		}
+
+		await dbConnect();
+		// Use a select/lean to only retrieve and return the necessary fields
+		const user = (await User.findById(idString)
+			.select('firstName lastName email')
+			.lean()) as UserData | null;
+
+		if (!user) {
+			// console.log("User not found."); // Optional: for debugging
+			return null;
+		}
+
+		// Destructure and return the clean object
+		const { firstName, lastName, email } = user;
+		return { firstName, lastName, email };
+	} catch (e) {
+		console.error('Failed to retrieve user data in Server Component:', e);
+		return null;
+	}
+}
+
+export default async function MainLayout({
+	children,
+}: {
+	children: ReactNode;
+}) {
+	const user = await getServerUser();
+
+	return <LayoutClientWrapper user={user}>{children}</LayoutClientWrapper>;
 }

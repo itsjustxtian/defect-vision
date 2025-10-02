@@ -1,79 +1,109 @@
 'use client';
 
-import React from 'react';
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table';
-import { SampleData } from '../data/SampleData';
-import { format } from 'date-fns';
+import React, { useEffect, useState } from 'react';
+import { MiniTable } from './MiniDataTable/data-table';
+import { columns, ScanResult } from './MiniDataTable/columns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MiniDataTable = () => {
-	// Sort the data by timestamp in descending order and get the top 5
-	const mostRecentScans = [...SampleData]
+	const [scanResults, setScanResults] = useState<ScanResult[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		// Function to fetch data from the API
+		const fetchScanResults = async () => {
+			try {
+				// Make a GET request to your API route
+				const response = await fetch('api/scan_results');
+
+				// Check if the request was successful
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+
+				const data = await response.json();
+
+				// Set the fetched data to state
+				setScanResults(data.data);
+
+				// Print the data to the console
+				console.log('Fetched Scan Results:', data.data);
+			} catch (err) {
+				// This is where you solve the 'unknown' error
+				if (err instanceof Error) {
+					// Now TypeScript knows 'err' is an Error object, so 'err.message' is safe.
+					// The state is set to a string.
+					setError(err.message);
+				} else {
+					// Handle other cases, e.g., a non-Error object was thrown.
+					setError('An unknown error occurred.');
+				}
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchScanResults();
+	}, []);
+
+	const mostRecentScans = scanResults
+		.slice() // 1. Create a shallow copy to prevent mutating the original state array
 		.sort((a, b) => {
-			const dateA = new Date(
-				a.output_image.video_metadata.frame_timestamp
-			).getTime();
-			const dateB = new Date(
-				b.output_image.video_metadata.frame_timestamp
-			).getTime();
+			// 2. Sort the array: convert timestamps to milliseconds and compare
+			const dateA = new Date(a.timestamp).getTime();
+			const dateB = new Date(b.timestamp).getTime();
+
+			// Return dateB - dateA for descending order (most recent first)
 			return dateB - dateA;
 		})
-		.slice(0, 5);
+		.slice(0, 5); // 3. Slice the first 5 entries
+
+	if (loading) {
+		return (
+			<div className="p-6 flex flex-col justify-center items-center h-40 space-y-2">
+				<div className="flex gap-2">
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[250px] rounded-full" />
+				</div>
+				<div className="flex gap-2">
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[250px] rounded-full" />
+				</div>
+				<div className="flex gap-2">
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[250px] rounded-full" />
+				</div>
+				<div className="flex gap-2">
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[250px] rounded-full" />
+				</div>
+				<div className="flex gap-2">
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[100px] rounded-full" />
+					<Skeleton className="h-[20px] w-[250px] rounded-full" />
+				</div>
+				<p>Loading recent scan data...</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="bg-red-900/50 text-white p-6 rounded-lg">
+				<p className="font-bold">Error loading data:</p>
+				<p>{error}</p>
+			</div>
+		);
+	}
 
 	return (
-		<div className="bg-black/20 p-6">
-			<Table>
-				<TableCaption>A list of your recent scans.</TableCaption>
-				<TableHeader>
-					<TableRow>
-						<TableHead className="w-[100px]">Date</TableHead>
-						<TableHead>Defect Count</TableHead>
-						<TableHead>Detected Classes</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{/* Check if the sorted array is empty */}
-					{mostRecentScans.length === 0 ? (
-						<TableRow>
-							<TableCell colSpan={3} className="h-24 text-center">
-								No recent scans.
-							</TableCell>
-						</TableRow>
-					) : (
-						// If there is data, map over it to render the rows
-						mostRecentScans.map((scan, index) => {
-							const defectClasses = scan.predictions.predictions.map(
-								(prediction) => prediction.class
-							);
-							const uniqueDefectClasses = [...new Set(defectClasses)].join(
-								', '
-							);
-
-							return (
-								<TableRow key={index}>
-									<TableCell className="font-medium">
-										{format(
-											new Date(
-												scan.output_image.video_metadata.frame_timestamp
-											),
-											'MM/dd/yyyy'
-										)}
-									</TableCell>
-									<TableCell>{scan.count_objects}</TableCell>
-									<TableCell>{uniqueDefectClasses}</TableCell>
-								</TableRow>
-							);
-						})
-					)}
-				</TableBody>
-			</Table>
+		<div className="p-6">
+			<MiniTable columns={columns} data={mostRecentScans} />
 		</div>
 	);
 };

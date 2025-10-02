@@ -24,11 +24,6 @@ export const items = [
 		url: '/reports',
 		icon: ScrollText,
 	},
-	{
-		title: 'History',
-		url: '#',
-		icon: History,
-	},
 ];
 
 export const QuickActionItems = [
@@ -43,20 +38,5 @@ export const QuickActionItems = [
 		title: 'View Reports...',
 		url: '/reports',
 		icon: ScrollText,
-	},
-	{
-		id: 3,
-		title: 'View History...',
-		url: '#',
-		icon: History,
-	},
-];
-
-export const FooterItems = [
-	{
-		id: 1,
-		title: 'Username',
-		url: '#',
-		icon: User2,
 	},
 ];

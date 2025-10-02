@@ -15,6 +15,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
 import ScanResult from '@/app/models/ScanResult';
+import OutputImageDialog from '../../reports/OutputImageDialog';
 
 interface ScanResult {
 	id: string; // Add this if your documents have an 'id' field
@@ -41,7 +42,33 @@ interface ScanResult {
 	};
 }
 
-export const columns: ColumnDef<ScanResult>[] = [
+const CLASS_NAME_MAP: { [key: string]: string } = {
+	CPU_FAN_NO_Screws: 'Missing CPU Fan Screws',
+	0: 'Rust',
+	CPU_fan: 'CPU Fan',
+	CPU_fan_port: 'CPU Fan Port',
+	CPU_fan_port_detached: 'Detached Fan Port',
+	CPU_FAN_Screw_loose: 'Loose CPU Fan Screw',
+	CPU_FAN_Screws: 'CPU Fan Screw',
+	Incorrect_Screws: 'Incorrect Screws Used',
+	Loose_Screws: 'Loose Screws',
+	Motherboard: 'Motherboard',
+	No_Screws: 'Missing Screws',
+	over_heat: 'Overheating Damage',
+	PCI_damage: 'Peripheral Component Damage',
+	pin_damage: 'Damaged pins',
+	RAM_damage: 'RAM Damage',
+	Scratch: 'Scratch',
+	Screws: 'Screws',
+};
+
+const formatClassName = (rawName: string): string => {
+	return CLASS_NAME_MAP[rawName] || rawName;
+};
+
+type OpenDialogFn = (imageUrl: string) => void;
+
+export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 	{
 		id: 'select',
 		header: ({ table }) => (
@@ -80,28 +107,32 @@ export const columns: ColumnDef<ScanResult>[] = [
 		accessorKey: 'predictions.predictions', // Correct accessor for the array
 		header: 'Defects Detected',
 		cell: ({ row }) => {
-			// Get the array of predictions
 			const predictions = row.original.predictions.predictions;
-			// Map over the array to get the class names
-			const classNames = predictions.map((p) => p.class);
-			return classNames.join(', ');
+
+			const formattedClassNames = predictions.map((p) =>
+				formatClassName(p.class)
+			);
+
+			const uniqueClassNames = Array.from(new Set(formattedClassNames));
+
+			return uniqueClassNames.join(', ');
 		},
 	},
 	{
 		accessorKey: 'output_image',
 		header: 'Visualization',
 		cell: ({ row }) => {
-			// Check if the image path exists
 			if (row.original.output_image) {
 				// Prepend the data URL header to the Base64 string
 				const dataUrl = `data:image/jpeg;base64,${row.original.output_image}`;
 
-				// Return an image element
 				return (
 					<img
-						src={dataUrl} // Use the data URL as the source
+						src={dataUrl}
 						alt="Defect Visualization"
-						className="h-16 w-16 object-cover rounded-md"
+						className="h-16 w-16 object-cover rounded-md cursor-pointer transition hover:scale-[1.05]"
+						// --- CORE CHANGE: Call the handler on click ---
+						onClick={() => openDialog(dataUrl)}
 					/>
 				);
 			}

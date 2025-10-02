@@ -2,6 +2,7 @@ import { ScanEye } from 'lucide-react';
 import { QuickActionItems } from './data/MenuItems';
 import MiniDataTable from './components/MiniDataTable';
 import { Metadata } from 'next';
+import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
 	title: 'Dashboard',
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 export default function Home() {
 	return (
 		<div className="min-h-[calc(100vh-3.75rem)] flex flex-col">
-			<main className="flex flex-1">
+			<main className="flex flex-1 flex-col md:flex-row">
 				<div
 					id="column-1"
 					className="flex-1 flex flex-col gap-20 justify-center items-center text-sm"

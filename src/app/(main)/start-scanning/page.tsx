@@ -82,7 +82,7 @@ const Page = () => {
 			});
 
 			const data = await res.json();
-			setNgrokStatus(data.status === 'active' ? 'active' : 'inactive');
+			setNgrokStatus(data.status);
 			console.log(data);
 		} catch (error) {
 			setNgrokStatus('⚠️ Unable to reach Pi.');
@@ -140,28 +140,21 @@ const Page = () => {
 						<button
 							onClick={handleClick}
 							disabled={
-								loading ||
-								!piNgrokUrl ||
-								!authToken ||
-								ngrokStatus == 'inactive'
+								loading || !piNgrokUrl || !authToken || ngrokStatus != 'active'
 							}
 							className={`px-6 py-3 w-full rounded-full text-white font-semibold transition-colors duration-200 ${
-								loading ||
-								!piNgrokUrl ||
-								!authToken ||
-								ngrokStatus == 'inactive' ||
-								'waiting'
+								loading || !piNgrokUrl || !authToken || ngrokStatus != 'active'
 									? 'bg-gray-400 cursor-not-allowed'
-									: 'bg-blue-600 hover:bg-blue-700'
+									: 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
 							}`}
 							title={`${
 								!piNgrokUrl
 									? "Ngrok URL is missing. Can't connect to the raspberry pi."
 									: !authToken
 									? "Authorization token is missing. Can't connect to the raspberry pi."
-									: ngrokStatus == 'inactive' || 'waiting'
-									? 'Disconnected from the scanner. Cannot proceed.'
-									: 'Error detected. Unable to scan.'
+									: ngrokStatus == 'active'
+									? 'Click to start scanning.'
+									: 'Disconnected from the scanner. Cannot proceed.'
 							}`}
 						>
 							{loading ? 'Sending Command...' : 'Run Pi Script'}
@@ -183,9 +176,6 @@ const Page = () => {
 							</pre>
 						</div>
 					)}
-				</div>
-				<div id="results" className="w-1/2 flex">
-					Hello
 				</div>
 			</div>
 		</div>
