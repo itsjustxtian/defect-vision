@@ -15,6 +15,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
 import ScanResult from '@/app/models/ScanResult';
+import { CLASS_NAME_MAP } from '../DataTable/columns';
 
 export interface ScanResult {
 	id: string; // Add this if your documents have an 'id' field
@@ -42,6 +43,10 @@ export interface ScanResult {
 	email: string;
 }
 
+const formatClassName = (rawName: string): string => {
+	return CLASS_NAME_MAP[rawName] || rawName;
+};
+
 export const columns: ColumnDef<ScanResult>[] = [
 	{
 		accessorKey: 'timestamp',
@@ -61,21 +66,19 @@ export const columns: ColumnDef<ScanResult>[] = [
 		accessorKey: 'predictions.predictions', // Correct accessor for the array
 		header: () => <div className="text-left">Defects Detected</div>,
 		cell: ({ row }) => {
-			// Get the array of predictions
 			const predictions = row.original.predictions.predictions;
-			// Map over the array to get the class names
-			const classNames = predictions.map((p) => p.class);
-			const classesString = classNames.join(', ');
 
-			// ✅ FIX: Directly return the JSX element (the <div>)
-			return (
-				<div
-					className="max-w-[250px] truncate overflow-hidden whitespace-nowrap"
-					title={classesString} // Add a title for full text on hover
-				>
-					{classesString}
-				</div>
+			const formattedClassNames = predictions.map((p) =>
+				formatClassName(p.class)
 			);
+
+			const uniqueClassNames = Array.from(new Set(formattedClassNames));
+
+			if (uniqueClassNames.length > 0) {
+				return uniqueClassNames.join(', ');
+			} else {
+				return <p>No defects detected.</p>;
+			}
 		},
 	},
 ];

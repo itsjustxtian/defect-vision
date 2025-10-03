@@ -87,7 +87,7 @@ const MiniDataTable = () => {
 					<Skeleton className="h-[20px] w-[100px] rounded-full" />
 					<Skeleton className="h-[20px] w-[250px] rounded-full" />
 				</div>
-				<p>Loading recent scan data...</p>
+				<p className="pt-6">Loading recent scan data...</p>
 			</div>
 		);
 	}
@@ -102,8 +102,11 @@ const MiniDataTable = () => {
 	}
 
 	return (
-		<div className="p-6">
+		<div className="p-6 w-full">
 			<MiniTable columns={columns} data={mostRecentScans} />
+			<p className="text-center pt-6 text-foreground/70">
+				A list of your previous scans.
+			</p>
 		</div>
 	);
 };
