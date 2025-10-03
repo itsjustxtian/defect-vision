@@ -39,6 +39,7 @@ export interface ScanResult {
 			parent_id: string;
 		}[];
 	};
+	email: string;
 }
 
 export const columns: ColumnDef<ScanResult>[] = [
