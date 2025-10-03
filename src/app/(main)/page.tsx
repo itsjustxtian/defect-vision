@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function Home() {
 	return (
-		<div className="min-h-[calc(100vh-3.75rem)] flex flex-col">
+		<div className="min-h-[calc(100vh-3.75rem)] flex flex-col px-10">
 			<main className="flex flex-1 flex-col md:flex-row">
 				<div
 					id="column-1"
@@ -36,7 +36,9 @@ export default function Home() {
 					</div>
 				</div>
 				<div id="column-2" className="flex-1 flex justify-center items-center">
-					<MiniDataTable />
+					<div className="bg-card p-10 rounded-md shadow-sm w-full">
+						<MiniDataTable />
+					</div>
 				</div>
 			</main>
 		</div>
