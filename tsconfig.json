@@ -31,7 +31,8 @@
 		"src/app/api/scans/route.js",
 		"src/lib/mongodb.js",
 		"src/lib/sessions.js",
-		"src/app/api/user/route.js"
+		"src/app/api/user/route.js",
+		"src/app/api/get_recent_scan/route.js"
 	],
 	"exclude": ["node_modules"]
 }

@@ -60,7 +60,7 @@ export default function NavBar({
 
 	return (
 		<div
-			className={`sticky top-0 w-full h-15 flex items-center justify-between px-5 z-[99999] ${backgroundClasses} transition-all duration-250`}
+			className={`sticky top-0 w-full h-15 flex items-center justify-between px-5 z-40 ${backgroundClasses} transition-all duration-250`}
 		>
 			<button className="cursor-pointer" onClick={onMenuClick}>
 				<Menu />
@@ -69,7 +69,7 @@ export default function NavBar({
 				<Cpu />
 				<p>DefectVision</p>
 			</div>
-			<div className="flex gap-2">
+			<div className="flex gap-4">
 				<DarkModeToggle />
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>

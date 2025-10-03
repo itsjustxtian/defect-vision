@@ -42,7 +42,7 @@ interface ScanResult {
 	};
 }
 
-const CLASS_NAME_MAP: { [key: string]: string } = {
+export const CLASS_NAME_MAP: { [key: string]: string } = {
 	CPU_FAN_NO_Screws: 'Missing CPU Fan Screws',
 	0: 'Rust',
 	CPU_fan: 'CPU Fan',

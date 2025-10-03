@@ -27,7 +27,6 @@ const OutputImageDialog = ({ imageUrl, onClose }: OutputImageDialogProps) => {
 					</DialogDescription>
 				</DialogHeader>
 
-				{/* Display the image if imageUrl is available */}
 				{imageUrl ? (
 					<img
 						src={imageUrl}
