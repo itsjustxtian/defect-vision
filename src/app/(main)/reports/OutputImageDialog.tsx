@@ -4,8 +4,8 @@ import {
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from '@/components/ui/dialog';
+import Image from 'next/image';
 
 interface OutputImageDialogProps {
 	imageUrl: string | null;
@@ -28,7 +28,7 @@ const OutputImageDialog = ({ imageUrl, onClose }: OutputImageDialogProps) => {
 				</DialogHeader>
 
 				{imageUrl ? (
-					<img
+					<Image
 						src={imageUrl}
 						alt="Defect Visualization Full Size"
 						className="w-full h-auto object-contain max-h-[80vh]" // Styling for a large, responsive image

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FileSearch } from 'lucide-react';
 import 'ldrs/react/TailChase.css';
 import ScanSettings from './ScanSettings';
@@ -29,6 +29,32 @@ const Page = () => {
 	const [ngrokStatus, setNgrokStatus] = useState('waiting');
 	const [latestScan, setLatestScan] = useState<ScanResult | null>(null);
 
+	const checkNgrokStatus = useCallback(async () => {
+		setNgrokStatus('waiting');
+		try {
+			const res = await fetch('/api/check_ngrok_status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ piNgrokUrl }),
+			});
+
+			const data = await res.json();
+
+			if (data?.status === 'active') {
+				setNgrokStatus(data.status);
+			} else if (data?.status === 'error') {
+				setNgrokStatus('inactive');
+			} else {
+				setNgrokStatus('waiting');
+			}
+
+			console.log(data);
+		} catch (error) {
+			setNgrokStatus('inactive');
+			console.error('Error checking ngrok status:', error);
+		}
+	}, [piNgrokUrl]);
+
 	useEffect(() => {
 		//gets the user details on render
 		const fetchUser = async () => {
@@ -38,7 +64,7 @@ const Page = () => {
 		};
 		fetchUser();
 		checkNgrokStatus();
-	}, []);
+	}, [checkNgrokStatus]);
 
 	const handleClick = async () => {
 		//handles sending instructions to the raspberry pi to initiate scanning
@@ -77,39 +103,13 @@ const Page = () => {
 		}
 	};
 
-	const checkNgrokStatus = async () => {
-		setNgrokStatus('waiting');
-		try {
-			const res = await fetch('/api/check_ngrok_status', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ piNgrokUrl }),
-			});
-
-			const data = await res.json();
-
-			if (data?.status == 'active') {
-				setNgrokStatus(data.status);
-			} else if (data?.status == 'error') {
-				setNgrokStatus('inactive');
-			} else {
-				setNgrokStatus('waiting');
-			}
-
-			console.log(data);
-		} catch (error) {
-			setNgrokStatus('inactive');
-			console.error('Error checking ngrok status:', error);
-		}
-	};
-
 	useEffect(() => {
 		const intervalId = setInterval(() => {
 			checkNgrokStatus();
 		}, 600000);
 
 		return () => clearInterval(intervalId);
-	}, [piNgrokUrl]);
+	}, [checkNgrokStatus]);
 
 	const fetchLatestScan = async (userEmail: string) => {
 		try {
@@ -130,12 +130,12 @@ const Page = () => {
 		}
 	};
 
-	const sampleFetch = async () => {
+	/*const sampleFetch = async () => {
 		if (user?.email) {
 			console.log('Fetching from email: ', user.email);
 			await fetchLatestScan(user.email);
 		}
-	};
+	};*/
 
 	return (
 		<div id="page" className="p-10 flex flex-col min-h-[calc(100vh-3.75rem)]">

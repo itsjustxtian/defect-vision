@@ -1,21 +1,10 @@
 'use client';
 
-import {
-	ColumnDef,
-	ColumnFiltersState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	SortingState,
-	useReactTable,
-	VisibilityState,
-} from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import ScanResult from '@/app/models/ScanResult';
-import OutputImageDialog from '../../reports/OutputImageDialog';
+import Image from 'next/image';
 
 interface ScanResult {
 	id: string; // Add this if your documents have an 'id' field
@@ -148,11 +137,12 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 				const dataUrl = `data:image/jpeg;base64,${row.original.output_image}`;
 
 				return (
-					<img
+					<Image
 						src={dataUrl}
 						alt="Defect Visualization"
-						className="h-16 w-16 object-cover rounded-md cursor-pointer transition hover:scale-[1.05]"
-						// --- CORE CHANGE: Call the handler on click ---
+						width={64}
+						height={64}
+						className="object-cover rounded-md cursor-pointer transition hover:scale-[1.05]"
 						onClick={() => openDialog(dataUrl)}
 					/>
 				);

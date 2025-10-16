@@ -26,11 +26,7 @@ interface NavBarProps {
 	user: UserData | null;
 }
 
-export default function NavBar({
-	onMenuClick,
-	isSidebarOpen,
-	user,
-}: NavBarProps) {
+export default function NavBar({ onMenuClick, user }: NavBarProps) {
 	// 1. New state to track scroll position
 	const [scrolled, setScrolled] = useState(false);
 

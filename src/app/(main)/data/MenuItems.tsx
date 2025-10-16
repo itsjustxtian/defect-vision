@@ -1,12 +1,4 @@
-import {
-	History,
-	Home,
-	ScanEye,
-	ScrollText,
-	Search,
-	Settings,
-	User2,
-} from 'lucide-react';
+import { Home, ScanEye, ScrollText } from 'lucide-react';
 
 export const items = [
 	{

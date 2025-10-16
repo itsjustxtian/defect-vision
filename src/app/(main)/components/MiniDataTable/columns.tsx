@@ -1,19 +1,6 @@
 'use client';
 
-import {
-	ColumnDef,
-	ColumnFiltersState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	SortingState,
-	useReactTable,
-	VisibilityState,
-} from '@tanstack/react-table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
 import ScanResult from '@/app/models/ScanResult';
 import { CLASS_NAME_MAP } from '../DataTable/columns';
 

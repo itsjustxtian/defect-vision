@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface IPCameraStreamProps {
 	streamUrl?: string;
@@ -61,15 +62,19 @@ const IPCameraStream: React.FC<IPCameraStreamProps> = ({
 						{error}
 					</div>
 				) : (
-					<img
-						src={streamUrl}
-						alt={`Live stream from ${cameraName}`}
-						onLoad={handleLoad}
-						onError={handleError}
-						className={`w-full h-full object-contain transition-opacity duration-300 ${
-							loading ? 'opacity-0' : 'opacity-100'
-						}`}
-					/>
+					streamUrl && (
+						<Image
+							src={streamUrl}
+							alt={`Live stream from ${cameraName}`}
+							width={800}
+							height={600}
+							onLoad={handleLoad}
+							onError={handleError}
+							className={`w-full h-full object-contain transition-opacity duration-300 ${
+								loading ? 'opacity-0' : 'opacity-100'
+							}`}
+						/>
+					)
 				)}
 			</div>
 			{!error && (

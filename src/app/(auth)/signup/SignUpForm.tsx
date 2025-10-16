@@ -38,16 +38,13 @@ export function SignUpForm() {
 			// Now, call the server action with the validated data
 			const result = await signUpAction(formData as TSignUpSchema);
 
-			if (result.errors) {
+			if (result?.errors) {
 				// If server-side validation failed
 				setErrors(result.errors);
 				setMessage('Please correct the form errors.');
-			} else if (result.success) {
-				// Handle success
-				setMessage('Sign up successful!');
 			} else {
 				// Handle a general server error
-				setMessage(result.error || 'An unexpected error occurred.');
+				setMessage(result?.error || 'An unexpected error occurred.');
 			}
 		} catch (e) {
 			if (e instanceof ZodError) {

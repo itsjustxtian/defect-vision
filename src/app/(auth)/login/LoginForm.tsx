@@ -1,7 +1,7 @@
 'use client';
 
 import { Eye, EyeOff, ScanEye } from 'lucide-react';
-import React, { useState, useActionState, useRef, useEffect } from 'react';
+import React, { useState, useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signInAction, SignInFormState } from '@/app/(auth)/actions';
 
@@ -29,7 +29,7 @@ export function LoginForm() {
 			<div className="mb-8 flex flex-col gap-2">
 				<h1 className="font-bold text-lg">Login Form</h1>
 				<p className="text-sm">
-					Don't have an account yet?{' '}
+					Don&apos;t have an account yet?{' '}
 					<a href="/signup" className="font-bold hover:underline">
 						Sign Up
 					</a>

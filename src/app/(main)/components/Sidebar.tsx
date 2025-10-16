@@ -1,11 +1,9 @@
-import { ChevronUp, Cpu, User2 } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
-	SidebarGroupLabel,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,

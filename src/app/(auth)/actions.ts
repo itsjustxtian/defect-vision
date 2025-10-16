@@ -48,7 +48,11 @@ export async function signUpAction(formData: TSignUpSchema) {
 		}
 
 		// Handle duplicate email error
-		if (e instanceof Error && 'code' in e && (e as any).code === 11000) {
+		if (
+			e instanceof Error &&
+			'code' in e &&
+			(e as { code: number }).code === 11000
+		) {
 			return { error: 'Email already exists. Please use a different one.' };
 		}
 

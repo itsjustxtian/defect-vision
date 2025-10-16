@@ -19,7 +19,7 @@ export async function decrypt(session) {
 		});
 		return payload; // <-- Add this line to return the payload
 	} catch (error) {
-		console.log('Failed to verify session.');
+		console.log('Failed to verify session.', error);
 		return null; // <-- Add this line to return null on error
 	}
 }

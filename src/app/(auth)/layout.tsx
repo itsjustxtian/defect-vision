@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { Moon, ScanEye, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 
 export default function AuthLayout({
 	children,
