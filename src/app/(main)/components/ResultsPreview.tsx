@@ -5,10 +5,19 @@ import LatestScanPreviewDialog from '../start-scanning/LatestScanPreviewDialog';
 import { CLASS_NAME_MAP } from './DataTable/columns';
 
 interface ResultsPreviewProps {
-	latestScan: ScanResult;
+	latestScan: ScanResult | null;
 }
 
 const ResultsPreview = ({ latestScan }: ResultsPreviewProps) => {
+	// 🛡️ Guard for undefined/null
+	if (!latestScan) {
+		return (
+			<div className="flex-1 flex flex-col bg-card border-2 rounded-lg p-6 text-center text-muted-foreground">
+				<p>No scan selected yet.</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="flex-1 flex flex-col bg-card border-2 rounded-lg">
 			<div className="flex-1 p-15 overflow-y-auto">
@@ -52,7 +61,7 @@ const ResultsPreview = ({ latestScan }: ResultsPreviewProps) => {
 					Detected Defects List
 				</h3>
 
-				{latestScan.predictions.predictions.length > 0 ? (
+				{latestScan.predictions?.predictions?.length > 0 ? (
 					<ul className="space-y-3">
 						{latestScan.predictions.predictions.map((prediction, index) => (
 							<li
