@@ -38,26 +38,37 @@ def display_ip():
     lcd.crlf()
     lcd.write_string(get_ip()[:16])  # Limit to 16 chars
 
+# Function to help scroll the message in case of overflow
+def scroll_text(line1, line2="", delay=0.3, duration=10):
+    lcd.clear()
+    max_len = max(len(line1), len(line2))
+    window_size = 16
+    steps = max(1, max_len - window_size + 1)
+    start_time = time.time()
+
+    while time.time() - start_time < duration:
+        for i in range(steps):
+            lcd.clear()
+            lcd.cursor_pos = (0, 0)
+            lcd.write_string(line1[i:i+window_size].ljust(window_size))
+            lcd.cursor_pos = (1, 0)
+            lcd.write_string(line2[i:i+window_size].ljust(window_size))
+            time.sleep(delay)
+            if time.time() - start_time >= duration:
+                break
+
 # Function to display the error and then go back to displaying the IP
 def display_error_then_revert(message):
     def show_then_revert():
-        lcd.clear()
-        lcd.write_string("Error:")
-        lcd.crlf()
-        lcd.write_string(message[:16])  # Show error
-        time.sleep(10)  # Wait 10 seconds
-        display_ip()    # Revert to IP
+        scroll_text("Error:", message, delay=0.4, duration=10)
+        display_ip()
     threading.Thread(target=show_then_revert).start()
 
-
+# Display successful message
 def display_success(message="Ready"):
     def show_then_revert():
-        lcd.clear()
-        lcd.write_string("Success:")
-        lcd.crlf()
-        lcd.write_string(message[:16])
-        time.sleep(10)  # Show success message for 10 seconds
-        display_ip()    # Revert to IP display
+        scroll_text("Success:", message, delay=0.4, duration=10)
+        display_ip()
     threading.Thread(target=show_then_revert).start()
 
 CAMERA_INDEX = 0
