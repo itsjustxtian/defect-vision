@@ -13,63 +13,63 @@ from gpiozero import LED
 from gpiozero import Buzzer
 from time import sleep
 import threading
-from RPLCD.i2c import CharLCD
+# from RPLCD.i2c import CharLCD
 import socket
 
-# Setup For I2C Connection
-lcd = CharLCD('PCF8574', 0x27)
-lcd.clear()
+# # Setup For I2C Connection
+# lcd = CharLCD('PCF8574', 0x27)
+# lcd.clear()
 
-# Function to get the IP Address of the Device
-def get_ip():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception as e:
-        return "IP Error"
+# # Function to get the IP Address of the Device
+# def get_ip():
+#     try:
+#         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+#         s.connect(("8.8.8.8", 80))
+#         ip = s.getsockname()[0]
+#         s.close()
+#         return ip
+#     except Exception as e:
+#         return "IP Error"
 
-# Function to display the IP
-def display_ip():
-    lcd.clear()
-    lcd.write_string("IP Address:")
-    lcd.crlf()
-    lcd.write_string(get_ip()[:16])  # Limit to 16 chars
+# # Function to display the IP
+# def display_ip():
+#     lcd.clear()
+#     lcd.write_string("IP Address:")
+#     lcd.crlf()
+#     lcd.write_string(get_ip()[:16])  # Limit to 16 chars
 
-# Function to help scroll the message in case of overflow
-def scroll_text(line1, line2="", delay=0.3, duration=10):
-    lcd.clear()
-    max_len = max(len(line1), len(line2))
-    window_size = 16
-    steps = max(1, max_len - window_size + 1)
-    start_time = time.time()
+# # Function to help scroll the message in case of overflow
+# def scroll_text(line1, line2="", delay=0.3, duration=10):
+#     lcd.clear()
+#     max_len = max(len(line1), len(line2))
+#     window_size = 16
+#     steps = max(1, max_len - window_size + 1)
+#     start_time = time.time()
 
-    while time.time() - start_time < duration:
-        for i in range(steps):
-            lcd.clear()
-            lcd.cursor_pos = (0, 0)
-            lcd.write_string(line1[i:i+window_size].ljust(window_size))
-            lcd.cursor_pos = (1, 0)
-            lcd.write_string(line2[i:i+window_size].ljust(window_size))
-            time.sleep(delay)
-            if time.time() - start_time >= duration:
-                break
+#     while time.time() - start_time < duration:
+#         for i in range(steps):
+#             lcd.clear()
+#             lcd.cursor_pos = (0, 0)
+#             lcd.write_string(line1[i:i+window_size].ljust(window_size))
+#             lcd.cursor_pos = (1, 0)
+#             lcd.write_string(line2[i:i+window_size].ljust(window_size))
+#             time.sleep(delay)
+#             if time.time() - start_time >= duration:
+#                 break
 
-# Function to display the error and then go back to displaying the IP
-def display_error_then_revert(message):
-    def show_then_revert():
-        scroll_text("Error:", message, delay=0.4, duration=10)
-        display_ip()
-    threading.Thread(target=show_then_revert).start()
+# # Function to display the error and then go back to displaying the IP
+# def display_error_then_revert(message):
+#     def show_then_revert():
+#         scroll_text("Error:", message, delay=0.4, duration=10)
+#         display_ip()
+#     threading.Thread(target=show_then_revert).start()
 
-# Display successful message
-def display_success(message="Ready"):
-    def show_then_revert():
-        scroll_text("Success:", message, delay=0.4, duration=10)
-        display_ip()
-    threading.Thread(target=show_then_revert).start()
+# # Display successful message
+# def display_success(message="Ready"):
+#     def show_then_revert():
+#         scroll_text("Success:", message, delay=0.4, duration=10)
+#         display_ip()
+#     threading.Thread(target=show_then_revert).start()
 
 CAMERA_INDEX = 0
 IMAGE_RESOLUTION = '1920x1080'
@@ -180,11 +180,11 @@ def run_script():
             ], check=True, capture_output=True, text=True)
             
         except subprocess.CalledProcessError as e:
-            display_error_then_revert(str(e))
+            # display_error_then_revert(str(e))
             # fswebcam failed (e.g., camera not connected or permission denied)
             threading.Thread(target=gpio_error_sequence).start()
             print(f"fswebcam failed: {e.stderr}")
-            display_error_then_revert(e)
+            # display_error_then_revert(e)
             return jsonify({
                 "status": "error", 
                 "message": "Failed to capture image via fswebcam. Check camera status.",
@@ -234,7 +234,7 @@ def run_script():
         insertion_result = collection.insert_one(first_result)
 
         threading.Thread(target=gpio_success_sequence).start()
-        display_success("Result inserted into MongoDB.")
+        # display_success("Result inserted into MongoDB.")
 
         return jsonify({
             "status": "success",
@@ -245,7 +245,7 @@ def run_script():
     except Exception as e:
         # Catch-all error handling
         threading.Thread(target=gpio_error_sequence).start()
-        display_error_then_revert(e)
+        # display_error_then_revert(e)
         return jsonify({
             "status": "error",
             "message": "An error occurred during script execution.",
@@ -257,14 +257,14 @@ def ngrok_status():
     tunnels = ngrok.get_tunnels()
     if tunnels:
         threading.Thread(target=gpio_success_sequence).start()
-        display_success("Ngrok tunnel is active!")
+        # display_success("Ngrok tunnel is active!")
         return jsonify({
             "status": "active",
             "tunnels": [t.public_url for t in tunnels]
         })
     else:
         threading.Thread(target=gpio_error_sequence).start()
-        display_error_then_revert("No ngrok tunnel is currently running.")
+        # display_error_then_revert("No ngrok tunnel is currently running.")
         return jsonify({
             "status": "inactive",
             "message": "No ngrok tunnel is currently running."
@@ -272,7 +272,7 @@ def ngrok_status():
     
 if __name__ == "__main__":
     import time
-    display_ip()
+    # display_ip()
 
     static_domain = "see-perturbable-hayes.ngrok-free.app"
     MAX_RETRIES = 3
@@ -287,7 +287,7 @@ if __name__ == "__main__":
             break
         except Exception as e:
             print(f"Attempt {attempt+1} failed: {e}")
-            display_error_then_revert(str(e))
+            # display_error_then_revert(str(e))
             time.sleep(5)
     else:
         threading.Thread(target=gpio_error_sequence).start()
