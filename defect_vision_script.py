@@ -169,6 +169,10 @@ def run_script():
         # --- STEP 1: CAPTURE IMAGE USING FSWEBCAM ---
         
         try:
+            print("Waiting 2 seconds for camera auto-exposure to adjust...")
+            # *** ADDED 2-SECOND DELAY HERE ***
+            sleep(2);
+
             print(f"Attempting to capture image via fswebcam to {temp_file_path}...")
             
             # Run fswebcam command to capture and save the image
