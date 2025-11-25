@@ -1,5 +1,6 @@
 #This script is stored in the Raspberry Pi and is configured to run on startup
 
+import time
 import base64
 import json
 import os
@@ -13,69 +14,20 @@ from gpiozero import LED
 from gpiozero import Buzzer
 from time import sleep
 import threading
-# from RPLCD.i2c import CharLCD
+import requests
 import socket
 
-# # Setup For I2C Connection
-# lcd = CharLCD('PCF8574', 0x27)
-# lcd.clear()
+# Configurations for checking internet connection
+PING_TARGET = "8.8.8.8"  # Google's DNS server, a reliable target
+LOG_FILE = "/var/log/internet_monitor.log"  # Log file path
+PING_INTERVAL_SECONDS = 60  # Check every 60 seconds
 
-# # Function to get the IP Address of the Device
-# def get_ip():
-#     try:
-#         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#         s.connect(("8.8.8.8", 80))
-#         ip = s.getsockname()[0]
-#         s.close()
-#         return ip
-#     except Exception as e:
-#         return "IP Error"
-
-# # Function to display the IP
-# def display_ip():
-#     lcd.clear()
-#     lcd.write_string("IP Address:")
-#     lcd.crlf()
-#     lcd.write_string(get_ip()[:16])  # Limit to 16 chars
-
-# # Function to help scroll the message in case of overflow
-# def scroll_text(line1, line2="", delay=0.3, duration=10):
-#     lcd.clear()
-#     max_len = max(len(line1), len(line2))
-#     window_size = 16
-#     steps = max(1, max_len - window_size + 1)
-#     start_time = time.time()
-
-#     while time.time() - start_time < duration:
-#         for i in range(steps):
-#             lcd.clear()
-#             lcd.cursor_pos = (0, 0)
-#             lcd.write_string(line1[i:i+window_size].ljust(window_size))
-#             lcd.cursor_pos = (1, 0)
-#             lcd.write_string(line2[i:i+window_size].ljust(window_size))
-#             time.sleep(delay)
-#             if time.time() - start_time >= duration:
-#                 break
-
-# # Function to display the error and then go back to displaying the IP
-# def display_error_then_revert(message):
-#     def show_then_revert():
-#         scroll_text("Error:", message, delay=0.4, duration=10)
-#         display_ip()
-#     threading.Thread(target=show_then_revert).start()
-
-# # Display successful message
-# def display_success(message="Ready"):
-#     def show_then_revert():
-#         scroll_text("Success:", message, delay=0.4, duration=10)
-#         display_ip()
-#     threading.Thread(target=show_then_revert).start()
-
+# Configurations for Web Camera
 CAMERA_INDEX = 0
 IMAGE_RESOLUTION = '1920x1080'
 
 # IMPORTANT: Set your ngrok Authtoken here for a more stable tunnel.
-# You can get one from your ngrok dashboard.
+# Get it from your ngrok dashboard.
 # ngrok.set_auth_token("YOUR_NGROK_AUTH_TOKEN")
 
 app = Flask(__name__)
@@ -118,6 +70,7 @@ except Exception as e:
 def gpio_success_sequence():
     """Sequence for a successful API call: green LED on and buzzer beeps."""
     print("Running GPIO success sequence...")
+    red.off()
     bz.on()
     green.on()
     sleep(0.2)
@@ -128,6 +81,7 @@ def gpio_success_sequence():
     bz.on()
     sleep(0.2)
     bz.off()
+    green.off()
     print("GPIO success sequence complete.")
 
 def gpio_error_sequence():
@@ -144,8 +98,7 @@ def gpio_error_sequence():
     bz.on()
     sleep(0.2)
     bz.off()
-    red.off()
-    green.on()
+    red.on()
     print("GPIO error sequence complete.")
 
 @app.route('/run-python-script', methods=['POST'])
@@ -274,9 +227,40 @@ def ngrok_status():
             "message": "No ngrok tunnel is currently running."
         })
     
+# --- Connectivity check ---
+def check_internet_connection(url="http://clients3.google.com/generate_204", timeout=3):
+    """
+    Returns True if we can reach the internet, False otherwise.
+    Uses Google's generate_204 endpoint which is designed for connectivity checks.
+    """
+    try:
+        requests.get(url, timeout=timeout)
+        return True
+    except requests.RequestException:
+        return False
+
+# --- Monitor thread ---
+def monitor_connection():
+    last_state = None
+    while True:
+        try:
+            connected = check_internet_connection()
+            if connected and last_state != True:
+                print("Internet connection restored.")
+                threading.Thread(target=gpio_success_sequence).start()
+                last_state = True
+            elif not connected and last_state != False:
+                print("Internet connection lost.")
+                threading.Thread(target=gpio_error_sequence).start()
+                last_state = False
+        except Exception as e:
+            print(f"Monitor thread error: {e}")
+        time.sleep(2)  # adjust polling interval as needed
+
+# --- Main entrypoint ---
 if __name__ == "__main__":
-    import time
-    # display_ip()
+    # Start the monitor in background
+    threading.Thread(target=monitor_connection, daemon=True).start()
 
     static_domain = "see-perturbable-hayes.ngrok-free.app"
     MAX_RETRIES = 3
@@ -291,7 +275,6 @@ if __name__ == "__main__":
             break
         except Exception as e:
             print(f"Attempt {attempt+1} failed: {e}")
-            # display_error_then_revert(str(e))
             time.sleep(5)
     else:
         threading.Thread(target=gpio_error_sequence).start()
