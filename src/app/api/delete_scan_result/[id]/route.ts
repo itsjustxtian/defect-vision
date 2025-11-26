@@ -2,10 +2,7 @@ import dbConnect from '@/lib/dbConnect';
 import ScanResult from '@/app/models/ScanResult';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function DELETE(
-	request: NextRequest,
-	context: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: any) {
 	await dbConnect();
 
 	const { id } = context.params; // comes from the [id] segment
