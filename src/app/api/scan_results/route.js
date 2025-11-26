@@ -6,7 +6,7 @@ export async function GET() {
 	await dbConnect();
 
 	try {
-		const scanResults = await ScanResult.find();
+		const scanResults = await ScanResult.find({}, { output_image: 0 });
 		return NextResponse.json(
 			{ success: true, data: scanResults },
 			{ status: 200 }

@@ -28,6 +28,16 @@ export interface ScanResult {
 		}[];
 	};
 	email: string;
+	json_parser?: {
+		issue: string | null;
+		severity: string | null;
+		cause: string | null;
+		fix: string | null;
+		class: string | null;
+		risk: string | null;
+		error_status: boolean | null;
+	};
+	open_ai?: string | null;
 }
 
 const formatClassName = (rawName: string): string => {

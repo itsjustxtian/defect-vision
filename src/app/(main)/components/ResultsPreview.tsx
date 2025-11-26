@@ -3,13 +3,18 @@ import { ScanResult } from './MiniDataTable/columns';
 import { CircleCheckBig, FileScan } from 'lucide-react';
 import LatestScanPreviewDialog from '../start-scanning/LatestScanPreviewDialog';
 import { CLASS_NAME_MAP } from './DataTable/columns';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface ResultsPreviewProps {
 	latestScan: ScanResult | null;
 }
 
 const ResultsPreview = ({ latestScan }: ResultsPreviewProps) => {
-	// 🛡️ Guard for undefined/null
 	if (!latestScan) {
 		return (
 			<div className="flex-1 flex flex-col bg-card border-2 rounded-lg p-6 text-center text-muted-foreground">
@@ -88,6 +93,58 @@ const ResultsPreview = ({ latestScan }: ResultsPreviewProps) => {
 						</p>
 					</div>
 				)}
+
+				<Accordion type="single" collapsible>
+					<AccordionItem value="item-1">
+						<AccordionTrigger>
+							<div className="flex gap-2 items-center">
+								<p>OpenAI Insights</p>
+								<p className="text-xs opacity-30">(experimental)</p>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent>
+							{latestScan.json_parser ? (
+								<div className="shadow-sm p-4 bg-defect-success-background rounded-lg space-y-4">
+									<div className="flex gap-2">
+										<strong>Issue:</strong>
+										<p>{latestScan.json_parser.issue}</p>
+									</div>
+									<div className="flex gap-2">
+										<strong>Severity:</strong>
+										<p>{latestScan.json_parser.severity}</p>
+									</div>
+									<div className="flex gap-2">
+										<strong>Cause:</strong>
+										<p>{latestScan.json_parser.cause}</p>
+									</div>
+									<div className="flex gap-2">
+										<strong>Fix:</strong>
+										<p>{latestScan.json_parser.fix}</p>
+									</div>
+									<div className="flex gap-2">
+										<strong>Class:</strong>
+										<p>{latestScan.json_parser.class}</p>
+									</div>
+									<div className="flex gap-2">
+										<strong>Risk:</strong>
+										<p>{latestScan.json_parser.risk}</p>
+									</div>
+									<p className="text-xs text-muted-foreground mt-2">
+										Disclaimer: The OpenAI Insights feature is experimental and
+										may occasionally produce inaccurate or incomplete results.
+										Please review findings carefully before relying on them.
+									</p>
+								</div>
+							) : (
+								<div className="text-center p-8 bg-defect-success-background rounded-lg">
+									<p className="font-medium opacity-50">
+										OpenAI is unavailable for this scan.
+									</p>
+								</div>
+							)}
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
 			</div>
 		</div>
 	);

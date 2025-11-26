@@ -2,13 +2,13 @@ import dbConnect from '@/lib/dbConnect';
 import ScanResult from '@/app/models/ScanResult';
 import { NextResponse } from 'next/server';
 
-export async function DELETE(
+export async function GET(
 	request: Request,
-	{ params }: { params: { id: string } }
+	context: { params: Promise<{ id: string }> } // params is async
 ) {
 	await dbConnect();
 
-	const id = params.id; // comes from the [id] segment
+	const { id } = await context.params; // ✅ await params
 
 	if (!id) {
 		return NextResponse.json(
@@ -18,9 +18,9 @@ export async function DELETE(
 	}
 
 	try {
-		const deleted = await ScanResult.findByIdAndDelete(id);
+		const scanDocument = await ScanResult.findById(id);
 
-		if (!deleted) {
+		if (!scanDocument) {
 			return NextResponse.json(
 				{ success: false, message: 'Scan result not found' },
 				{ status: 404 }
@@ -28,11 +28,11 @@ export async function DELETE(
 		}
 
 		return NextResponse.json(
-			{ success: true, message: 'Scan result deleted successfully' },
+			{ success: true, data: scanDocument },
 			{ status: 200 }
 		);
 	} catch (error) {
-		console.error('Error deleting scan result:', error);
+		console.error('Error retrieving scan result:', error);
 		return NextResponse.json(
 			{ success: false, message: 'Server error' },
 			{ status: 500 }

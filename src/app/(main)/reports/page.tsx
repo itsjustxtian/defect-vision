@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { DataTable } from '../components/DataTable/data-table';
-import { columns as baseColumns } from '../components/DataTable/columns';
+import { columns } from '../components/DataTable/columns';
 import OutputImageDialog from './OutputImageDialog';
 import { LineSpinner } from 'ldrs/react';
 import 'ldrs/react/LineSpinner.css';
@@ -54,97 +54,6 @@ const Page = () => {
 		};
 	}, []);
 
-	// Add Action column with three dots
-	const columnsWithHandler = React.useMemo(() => {
-		const actionColumn = {
-			id: 'action',
-			header: 'Action',
-			cell: ({ row }: any) => (
-				<div style={{ position: 'relative' }} ref={actionMenuRef}>
-					<button
-						onClick={() =>
-							setActionMenuRow(
-								actionMenuRow === row.original ? null : row.original
-							)
-						}
-						style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-						aria-label="Actions"
-					>
-						<MoreVertical size={20} />
-					</button>
-					{actionMenuRow && actionMenuRow === row.original && (
-						<div
-							style={{
-								position: 'absolute',
-								right: 0,
-								top: '100%',
-								background: 'white',
-								border: '1px solid #ddd',
-								borderRadius: 4,
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-								zIndex: 10,
-								minWidth: 120,
-								color: 'black',
-							}}
-						>
-							<button
-								style={{
-									display: 'block',
-									width: '100%',
-									padding: '8px 16px',
-									background: 'none',
-									border: 'none',
-									textAlign: 'left',
-									cursor: 'pointer',
-								}}
-								onClick={async () => {
-									const id = row.original._id || row.original.id;
-
-									const res = await fetch(`/api/delete_scan_result?id=${id}`, {
-										method: 'DELETE',
-									});
-
-									const data = await res.json();
-
-									if (data.success) {
-										setScanResults((prev) => prev.filter((r) => r.id !== id));
-									} else {
-										console.error(data.message);
-									}
-
-									setActionMenuRow(null);
-								}}
-							>
-								Delete
-							</button>
-							<button
-								style={{
-									display: 'block',
-									width: '100%',
-									padding: '8px 16px',
-									background: 'none',
-									border: 'none',
-									textAlign: 'left',
-									cursor: 'pointer',
-								}}
-								onClick={() => {
-									navigator.clipboard.writeText(
-										JSON.stringify(row.original, null, 2)
-									);
-									setActionMenuRow(null);
-								}}
-							>
-								Copy as JSON
-							</button>
-							{/* ❌ Removed Close button */}
-						</div>
-					)}
-				</div>
-			),
-		};
-		return [...baseColumns(openDialogHandler), actionColumn];
-	}, [actionMenuRow]);
-
 	const handleRowClick = (row: any) => {
 		setCurrentlySelectedRow(row);
 	};
@@ -157,7 +66,30 @@ const Page = () => {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
 				const data = await response.json();
-				setScanResults(data.data);
+
+				// Sort by timestamp descending (most recent first)
+				const sortedResults = data.data.sort(
+					(
+						a: { timestamp: string | number | Date },
+						b: { timestamp: string | number | Date }
+					) => {
+						// 2. Sort the array: convert timestamps to milliseconds and compare
+						const dateA = new Date(a.timestamp).getTime();
+						const dateB = new Date(b.timestamp).getTime();
+
+						// Return dateB - dateA for descending order (most recent first)
+						return dateB - dateA;
+					}
+				);
+
+				const normalized = sortedResults.map((doc: any) => ({
+					...doc,
+					id: doc._id, // ensure id exists
+				}));
+
+				console.log(normalized);
+
+				setScanResults(normalized);
 			} catch (err) {
 				if (err instanceof Error) {
 					setError(err.message);
@@ -212,7 +144,7 @@ const Page = () => {
 			<div className="min-h-screen px-20 py-10 flex gap-20">
 				<div className="w-2/3">
 					<DataTable
-						columns={columnsWithHandler}
+						columns={columns(openDialogHandler)}
 						data={scanResults}
 						onRowClick={handleRowClick}
 					/>

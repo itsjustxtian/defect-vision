@@ -2,12 +2,19 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, MoreVertical } from 'lucide-react';
 import ScanResult from '@/app/models/ScanResult';
 import Image from 'next/image';
 
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
 interface ScanResult {
-	id: string; // Add this if your documents have an 'id' field
+	id: string;
 	count_objects: number;
 	output_image: string;
 	image_name: string;
@@ -58,28 +65,28 @@ const formatClassName = (rawName: string): string => {
 type OpenDialogFn = (imageUrl: string) => void;
 
 export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
-	{
-		id: 'select',
-		header: ({ table }) => (
-			<Checkbox
-				checked={
-					table.getIsAllPageRowsSelected() ||
-					(table.getIsSomePageRowsSelected() && 'indeterminate')
-				}
-				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-				aria-label="Select all"
-			/>
-		),
-		cell: ({ row }) => (
-			<Checkbox
-				checked={row.getIsSelected()}
-				onCheckedChange={(value) => row.toggleSelected(!!value)}
-				aria-label="Select row"
-			/>
-		),
-		enableSorting: false,
-		enableHiding: false,
-	},
+	// {
+	// 	id: 'select',
+	// 	header: ({ table }) => (
+	// 		<Checkbox
+	// 			checked={
+	// 				table.getIsAllPageRowsSelected() ||
+	// 				(table.getIsSomePageRowsSelected() && 'indeterminate')
+	// 			}
+	// 			onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+	// 			aria-label="Select all"
+	// 		/>
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<Checkbox
+	// 			checked={row.getIsSelected()}
+	// 			onCheckedChange={(value) => row.toggleSelected(!!value)}
+	// 			aria-label="Select row"
+	// 		/>
+	// 	),
+	// 	enableSorting: false,
+	// 	enableHiding: false,
+	// },
 	{
 		accessorKey: 'timestamp',
 		header: ({ column }) => {
@@ -112,6 +119,14 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 				</button>
 			);
 		},
+		cell: ({ row }) => {
+			const defectcount = row.original.count_objects;
+			if (defectcount == 0) {
+				return <p className="text-defect-success-text">{defectcount}</p>;
+			} else {
+				return <p className="text-defect-text">{defectcount}</p>;
+			}
+		},
 	},
 	{
 		accessorKey: 'predictions.predictions', // Correct accessor for the array
@@ -119,35 +134,79 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 		cell: ({ row }) => {
 			const predictions = row.original.predictions.predictions;
 
+			if (predictions.length == 0) {
+				return <p className="text-defect-success-text">No defects detected.</p>;
+			}
+
 			const formattedClassNames = predictions.map((p) =>
 				formatClassName(p.class)
 			);
 
 			const uniqueClassNames = Array.from(new Set(formattedClassNames));
 
-			return uniqueClassNames.join(', ');
+			return <p className="text-defect-text">{uniqueClassNames.join(', ')}</p>;
 		},
 	},
 	{
-		accessorKey: 'output_image',
-		header: 'Visualization',
+		header: 'Actions',
 		cell: ({ row }) => {
-			if (row.original.output_image) {
-				// Prepend the data URL header to the Base64 string
-				const dataUrl = `data:image/jpeg;base64,${row.original.output_image}`;
+			return (
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<button
+							className="cursor-pointer"
+							onClick={(e) => e.stopPropagation()}
+						>
+							<MoreVertical size={20} />
+						</button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent>
+						<DropdownMenuItem
+							onClick={async () => {
+								console.log('Delete clicked.');
+								const id = row.original.id;
 
-				return (
-					<Image
-						src={dataUrl}
-						alt="Defect Visualization"
-						width={64}
-						height={64}
-						className="object-cover rounded-md cursor-pointer transition hover:scale-[1.05]"
-						onClick={() => openDialog(dataUrl)}
-					/>
-				);
-			}
-			return 'No Image';
+								try {
+									const res = await fetch(`/api/delete_scan_result/${id}`, {
+										method: 'DELETE',
+									});
+
+									if (!res.ok) {
+										throw new Error(`HTTP error! status: ${res.status}`);
+									}
+
+									const data = await res.json();
+
+									if (data.success) {
+										// // Update local state to remove the deleted row
+										// setScanResults((prev) => prev.filter((r) => r.id !== id));
+										console.log(`Document ID ${id} successfully deleted!`);
+									} else {
+										console.error(`Delete failed: ${data.message}`);
+									}
+								} catch (err) {
+									console.error('Error deleting document:', err);
+								}
+							}}
+						>
+							Delete
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={() => {
+								try {
+									const json = JSON.stringify(row.original, null, 2); // pretty print
+									navigator.clipboard.writeText(json);
+									console.log('Row copied to clipboard:', json);
+								} catch (err) {
+									console.error('Failed to copy row JSON:', err);
+								}
+							}}
+						>
+							Copy as JSON
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			);
 		},
 	},
 ];

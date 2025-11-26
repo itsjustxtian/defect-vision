@@ -28,7 +28,7 @@ const OutputImageDialog = ({ imageUrl, onClose }: OutputImageDialogProps) => {
 				</DialogHeader>
 
 				{imageUrl ? (
-					<Image
+					<img
 						src={imageUrl}
 						alt="Defect Visualization Full Size"
 						className="w-full h-auto object-contain max-h-[80vh]" // Styling for a large, responsive image
