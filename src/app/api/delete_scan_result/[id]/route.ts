@@ -1,14 +1,14 @@
 import dbConnect from '@/lib/dbConnect';
 import ScanResult from '@/app/models/ScanResult';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(
-	request: Request,
-	{ params }: { params: { id: string } }
+	request: NextRequest,
+	context: { params: { id: string } }
 ) {
 	await dbConnect();
 
-	const id = params.id; // comes from the [id] segment
+	const { id } = context.params; // comes from the [id] segment
 
 	if (!id) {
 		return NextResponse.json(
