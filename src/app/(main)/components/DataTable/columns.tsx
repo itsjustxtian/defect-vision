@@ -1,10 +1,8 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowUpDown, MoreVertical } from 'lucide-react';
 import ScanResult from '@/app/models/ScanResult';
-import Image from 'next/image';
 
 import {
 	DropdownMenu,
