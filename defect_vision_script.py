@@ -16,6 +16,7 @@ from time import sleep
 import threading
 import requests
 import socket
+import cv2
 
 # Configurations for checking internet connection
 PING_TARGET = "8.8.8.8"  # Google's DNS server, a reliable target
@@ -90,13 +91,15 @@ def gpio_error_sequence():
     green.off()
     red.on()
     bz.on()
-    sleep(0.2)
+    sleep(0.5)
     bz.off()
     sleep(0.2)
     bz.on()
+    sleep(0.5)
+    bz.off()
     sleep(0.2)
     bz.on()
-    sleep(0.2)
+    sleep(0.5)
     bz.off()
     red.on()
     print("GPIO error sequence complete.")
@@ -123,18 +126,34 @@ def run_script():
         
         try:
             print("Waiting 2 seconds for camera auto-exposure to adjust...")
-            # *** ADDED 2-SECOND DELAY HERE ***
-            sleep(2);
 
-            print(f"Attempting to capture image via fswebcam to {temp_file_path}...")
-            
-            # Run fswebcam command to capture and save the image
-            subprocess.run([
-                'fswebcam', 
-                '-r', IMAGE_RESOLUTION, 
-                '--no-banner',        # Removes the timestamp banner from the image
-                temp_file_path
-            ], check=True, capture_output=True, text=True)
+            print("Attempting to capture image via OpenCV...")
+
+            cap = cv2.VideoCapture(CAMERA_INDEX)
+
+            # Set resolution (split IMAGE_RESOLUTION string into width/height)
+            width, height = map(int, IMAGE_RESOLUTION.split('x'))
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+            # Warm up camera by discarding a few frames
+            for _ in range(10):
+                cap.read()
+
+            ret, frame = cap.read()
+            cap.release()
+
+            if not ret or frame is None:
+                threading.Thread(target=gpio_error_sequence).start()
+                return jsonify({
+                    "status": "error",
+                    "message": "Failed to capture image via OpenCV. Check camera status."
+                }), 500
+
+            # Save to temp file
+            cv2.imwrite(temp_file_path, frame)
+
+
             
         except subprocess.CalledProcessError as e:
             # display_error_then_revert(str(e))
