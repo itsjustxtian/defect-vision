@@ -149,7 +149,7 @@ const Page = () => {
 						onRowClick={handleRowClick}
 					/>
 				</div>
-				<div className="w-1/3">
+				<div className="max-h-[90vh] w-1/3">
 					{/* <p>This is where the details go.</p> */}
 					<ResultsPreview latestScan={currentlySelectedRow} />
 				</div>

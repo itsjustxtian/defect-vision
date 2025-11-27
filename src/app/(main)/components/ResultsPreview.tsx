@@ -24,7 +24,7 @@ const ResultsPreview = ({ latestScan }: ResultsPreviewProps) => {
 	}
 
 	return (
-		<div className="flex-1 flex flex-col bg-card border-2 rounded-lg">
+		<div className="flex-1 max-h-[80vh] flex flex-col bg-card border-2 rounded-lg">
 			<div className="flex-1 p-15 overflow-y-auto">
 				<h2 className="text-3xl font-bold mb-4 flex gap-2 items-center border-b pb-2">
 					<FileScan />
@@ -66,33 +66,35 @@ const ResultsPreview = ({ latestScan }: ResultsPreviewProps) => {
 					Detected Defects List
 				</h3>
 
-				{latestScan.predictions?.predictions?.length > 0 ? (
-					<ul className="space-y-3">
-						{latestScan.predictions.predictions.map((prediction, index) => (
-							<li
-								key={index}
-								className="p-3 bg-defect-background border-l-4 border-defect-border rounded-md shadow-sm"
-							>
-								<p className="text-base font-semibold text-defect-text">
-									Defect:{' '}
-									<span className="font-bold">
-										{CLASS_NAME_MAP[prediction.class] || prediction.class}
-									</span>
-								</p>
-								<p className="text-sm text-defect-confidence mt-1">
-									Confidence: {(prediction.confidence * 100).toFixed(2)}%
-								</p>
-							</li>
-						))}
-					</ul>
-				) : (
-					<div className="text-center p-8 bg-defect-success-background rounded-lg">
-						<CircleCheckBig className="h-8 w-8 mx-auto mb-3 text-defect-success-text" />
-						<p className="font-medium text-defect-success-text">
-							No defects detected in this scan.
-						</p>
-					</div>
-				)}
+				<div className="flex-1 max-h-[25vh] overflow-y-auto">
+					{latestScan.predictions?.predictions?.length > 0 ? (
+						<ul className="space-y-3">
+							{latestScan.predictions.predictions.map((prediction, index) => (
+								<li
+									key={index}
+									className="p-3 bg-defect-background border-l-4 border-defect-border rounded-md shadow-sm"
+								>
+									<p className="text-base font-semibold text-defect-text">
+										Defect:{' '}
+										<span className="font-bold">
+											{CLASS_NAME_MAP[prediction.class] || prediction.class}
+										</span>
+									</p>
+									<p className="text-sm text-defect-confidence mt-1">
+										Confidence: {(prediction.confidence * 100).toFixed(2)}%
+									</p>
+								</li>
+							))}
+						</ul>
+					) : (
+						<div className="text-center p-8 bg-defect-success-background rounded-lg">
+							<CircleCheckBig className="h-8 w-8 mx-auto mb-3 text-defect-success-text" />
+							<p className="font-medium text-defect-success-text">
+								No defects detected in this scan.
+							</p>
+						</div>
+					)}
+				</div>
 
 				<Accordion type="single" collapsible>
 					<AccordionItem value="item-1">

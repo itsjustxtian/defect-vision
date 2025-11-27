@@ -21,23 +21,30 @@ export async function POST(req: Request) {
 				'Content-Type': 'application/json',
 				Authorization: `Bearer ${authToken}`,
 			},
-			body: JSON.stringify({ email }), // ✅ send email to Pi
+			body: JSON.stringify({ email }),
 		});
 
 		const data = await res.json();
 
 		if (!res.ok) {
-			// Re-throw the error with details from the server
-			throw new Error(
-				`Pi server responded with status: ${res.status}, error: ${data.error}`
+			// Bubble up the Pi server’s status and message directly
+			return new Response(
+				JSON.stringify({
+					status: 'error',
+					message: data.message || 'Pi server returned an error.',
+					details: data.error || null,
+				}),
+				{
+					status: res.status, // preserve Pi server’s status code
+					headers: { 'Content-Type': 'application/json' },
+				}
 			);
 		}
 
+		// Success case
 		return new Response(JSON.stringify(data), {
 			status: 200,
-			headers: {
-				'Content-Type': 'application/json',
-			},
+			headers: { 'Content-Type': 'application/json' },
 		});
 	} catch (error: unknown) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
@@ -50,10 +57,8 @@ export async function POST(req: Request) {
 				details: errorMessage,
 			}),
 			{
-				status: 500,
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				status: 502, // Bad Gateway (since Pi is unreachable)
+				headers: { 'Content-Type': 'application/json' },
 			}
 		);
 	}

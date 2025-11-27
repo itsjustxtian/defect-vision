@@ -130,13 +130,6 @@ const Page = () => {
 		}
 	};
 
-	/*const sampleFetch = async () => {
-		if (user?.email) {
-			console.log('Fetching from email: ', user.email);
-			await fetchLatestScan(user.email);
-		}
-	};*/
-
 	return (
 		<div id="page" className="p-10 flex flex-col min-h-[calc(100vh-3.75rem)]">
 			<div id="header" className="flex justify-end pb-6 mb-6 border-b">
@@ -171,7 +164,7 @@ const Page = () => {
 					Sample Fetch
 					</button>*/}
 			</div>
-			<div id="content" className="flex gap-2 flex-grow overflow-y-auto">
+			<div id="content" className="flex gap-2 flex-grow">
 				<div id="controls" className="flex-1 flex justify-center">
 					<div
 						id="controls"
@@ -230,14 +223,18 @@ const Page = () => {
 						)}
 					</div>
 				</div>
-				{latestScan ? (
-					<ResultsPreview latestScan={latestScan} />
-				) : (
-					<div className="flex-1 flex flex-col justify-center items-center bg-white border-2 rounded-lg shadow-lg gap-2 text-gray-600">
-						<FileSearch size={40} />
-						<p>Your scan will appear here.</p>
+				<div className="flex-1">
+					<div className="flex justify-center items-center">
+						{latestScan ? (
+							<ResultsPreview latestScan={latestScan} />
+						) : (
+							<div className="flex-1 h-[70vh] flex flex-col justify-center items-center bg-white border-2 rounded-lg shadow-lg gap-2 text-gray-600">
+								<FileSearch size={40} />
+								<p>Your scan will appear here.</p>
+							</div>
+						)}
 					</div>
-				)}
+				</div>
 			</div>
 		</div>
 	);
