@@ -146,6 +146,39 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 		},
 	},
 	{
+		header: 'Confidence Range',
+		cell: ({ row }) => {
+			const predictions = row.original.predictions.predictions;
+
+			// Extract all confidence values
+			const confidences = predictions.map((p) => p.confidence * 100);
+
+			// Find lowest and highest
+			const lowestConfidence = Math.min(...confidences);
+			const highestConfidence = Math.max(...confidences);
+
+			return (
+				<p>
+					{lowestConfidence.toFixed(2)}% - {highestConfidence.toFixed(2)}%
+				</p>
+			);
+		},
+	},
+	{
+		header: 'Average Confidence',
+		cell: ({ row }) => {
+			const predictions = row.original.predictions.predictions;
+			const totalConfidence = predictions.reduce(
+				(sum, pred) => sum + pred.confidence,
+				0
+			);
+			const averageConfidence = totalConfidence / predictions.length;
+			const averageConfidencePercent = averageConfidence * 100;
+
+			return <p>{averageConfidencePercent.toFixed(2)} %</p>;
+		},
+	},
+	{
 		header: 'Actions',
 		cell: ({ row }) => {
 			return (
