@@ -68,6 +68,7 @@ const Page = () => {
 
 	const handleClick = async () => {
 		//handles sending instructions to the raspberry pi to initiate scanning
+		setLatestScan(null);
 		setLoading(true);
 		setResponse(null);
 
