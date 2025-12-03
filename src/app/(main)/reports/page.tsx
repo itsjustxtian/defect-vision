@@ -38,7 +38,6 @@ const Page = () => {
 		}
 	}, [scanResults, currentlySelectedRow]);
 
-	// Close on outside click
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (
@@ -58,48 +57,49 @@ const Page = () => {
 		setCurrentlySelectedRow(row);
 	};
 
-	useEffect(() => {
-		const fetchScanResults = async () => {
-			try {
-				const response = await fetch('api/scan_results');
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
-				const data = await response.json();
+	const fetchScanResults = async () => {
+		try {
+			const emailRes = await fetch('/api/user/email');
+			if (!emailRes.ok) throw new Error('Failed to fetch user email');
+			const { email } = await emailRes.json();
 
-				// Sort by timestamp descending (most recent first)
-				const sortedResults = data.data.sort(
-					(
-						a: { timestamp: string | number | Date },
-						b: { timestamp: string | number | Date }
-					) => {
-						// 2. Sort the array: convert timestamps to milliseconds and compare
-						const dateA = new Date(a.timestamp).getTime();
-						const dateB = new Date(b.timestamp).getTime();
-
-						// Return dateB - dateA for descending order (most recent first)
-						return dateB - dateA;
-					}
-				);
-
-				const normalized = sortedResults.map((doc: any) => ({
-					...doc,
-					id: doc._id, // ensure id exists
-				}));
-
-				console.log(normalized);
-
-				setScanResults(normalized);
-			} catch (err) {
-				if (err instanceof Error) {
-					setError(err.message);
-				} else {
-					setError('An unknown error occurred.');
-				}
-			} finally {
+			if (!email) {
+				setError('No user email found');
 				setLoading(false);
+				return;
 			}
-		};
+
+			const response = await fetch(
+				`/api/scan_results?email=${encodeURIComponent(email)}`
+			);
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			const data = await response.json();
+
+			const sortedResults = data.data.sort(
+				(
+					a: { timestamp: string | number | Date },
+					b: { timestamp: string | number | Date }
+				) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+			);
+
+			const normalized = sortedResults.map((doc: any) => ({
+				...doc,
+				id: doc._id,
+			}));
+
+			setScanResults(normalized);
+		} catch (err) {
+			setError(
+				err instanceof Error ? err.message : 'An unknown error occurred.'
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
 		fetchScanResults();
 	}, []);
 
@@ -144,13 +144,13 @@ const Page = () => {
 			<div className="min-h-screen px-20 py-10 flex gap-20">
 				<div className="w-2/3">
 					<DataTable
-						columns={columns(openDialogHandler)}
+						columns={columns(openDialogHandler, fetchScanResults)}
 						data={scanResults}
 						onRowClick={handleRowClick}
 					/>
 				</div>
 				<div className="max-h-[90vh] w-1/3">
-					{/* <p>This is where the details go.</p> */}
+					{}
 					<ResultsPreview latestScan={currentlySelectedRow} />
 				</div>
 			</div>

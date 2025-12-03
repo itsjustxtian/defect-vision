@@ -62,29 +62,10 @@ const formatClassName = (rawName: string): string => {
 
 type OpenDialogFn = (imageUrl: string) => void;
 
-export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
-	// {
-	// 	id: 'select',
-	// 	header: ({ table }) => (
-	// 		<Checkbox
-	// 			checked={
-	// 				table.getIsAllPageRowsSelected() ||
-	// 				(table.getIsSomePageRowsSelected() && 'indeterminate')
-	// 			}
-	// 			onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-	// 			aria-label="Select all"
-	// 		/>
-	// 	),
-	// 	cell: ({ row }) => (
-	// 		<Checkbox
-	// 			checked={row.getIsSelected()}
-	// 			onCheckedChange={(value) => row.toggleSelected(!!value)}
-	// 			aria-label="Select row"
-	// 		/>
-	// 	),
-	// 	enableSorting: false,
-	// 	enableHiding: false,
-	// },
+export const columns = (
+	openDialog: OpenDialogFn,
+	refreshFn?: () => void
+): ColumnDef<ScanResult>[] => [
 	{
 		accessorKey: 'timestamp',
 		header: ({ column }) => {
@@ -209,9 +190,8 @@ export const columns = (openDialog: OpenDialogFn): ColumnDef<ScanResult>[] => [
 									const data = await res.json();
 
 									if (data.success) {
-										// // Update local state to remove the deleted row
-										// setScanResults((prev) => prev.filter((r) => r.id !== id));
 										console.log(`Document ID ${id} successfully deleted!`);
+										if (refreshFn) refreshFn();
 									} else {
 										console.error(`Delete failed: ${data.message}`);
 									}

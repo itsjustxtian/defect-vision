@@ -11,34 +11,43 @@ const MiniDataTable = () => {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		// Function to fetch data from the API
 		const fetchScanResults = async () => {
 			try {
-				// Make a GET request to your API route
-				const response = await fetch('api/scan_results');
+				const emailRes = await fetch('/api/user/email');
+				if (!emailRes.ok) throw new Error('Failed to fetch user email');
+				const { email } = await emailRes.json();
 
-				// Check if the request was successful
+				if (!email) {
+					setError('No user email found');
+					setLoading(false);
+					return;
+				}
+
+				const response = await fetch(
+					`/api/scan_results?email=${encodeURIComponent(email)}`
+				);
 				if (!response.ok) {
 					throw new Error(`HTTP error! status: ${response.status}`);
 				}
-
 				const data = await response.json();
 
-				// Set the fetched data to state
-				setScanResults(data.data);
+				const sortedResults = data.data.sort(
+					(
+						a: { timestamp: string | number | Date },
+						b: { timestamp: string | number | Date }
+					) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+				);
 
-				// Print the data to the console
-				console.log('Fetched Scan Results:', data.data);
+				const normalized = sortedResults.map((doc: any) => ({
+					...doc,
+					id: doc._id,
+				}));
+
+				setScanResults(normalized);
 			} catch (err) {
-				// This is where you solve the 'unknown' error
-				if (err instanceof Error) {
-					// Now TypeScript knows 'err' is an Error object, so 'err.message' is safe.
-					// The state is set to a string.
-					setError(err.message);
-				} else {
-					// Handle other cases, e.g., a non-Error object was thrown.
-					setError('An unknown error occurred.');
-				}
+				setError(
+					err instanceof Error ? err.message : 'An unknown error occurred.'
+				);
 			} finally {
 				setLoading(false);
 			}
@@ -48,16 +57,14 @@ const MiniDataTable = () => {
 	}, []);
 
 	const mostRecentScans = scanResults
-		.slice() // 1. Create a shallow copy to prevent mutating the original state array
+		.slice()
 		.sort((a, b) => {
-			// 2. Sort the array: convert timestamps to milliseconds and compare
 			const dateA = new Date(a.timestamp).getTime();
 			const dateB = new Date(b.timestamp).getTime();
 
-			// Return dateB - dateA for descending order (most recent first)
 			return dateB - dateA;
 		})
-		.slice(0, 5); // 3. Slice the first 5 entries
+		.slice(0, 5);
 
 	if (loading) {
 		return (
