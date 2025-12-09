@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 export default function Home() {
 	return (
 		<div className="min-h-[calc(100vh-3.75rem)] flex flex-col px-10">
-			<main className="flex flex-1 flex-col md:flex-row">
+			<main className="flex flex-1 flex-col items-center md:flex-row">
 				<div
 					id="column-1"
-					className="flex-1 flex flex-col gap-20 justify-center items-center text-sm"
+					className="w-1/2 py-20 flex flex-col gap-20 justify-center items-center text-sm"
 				>
-					<div className="flex items-center text-6xl">
+					<div className="flex items-center text-4xl md:text-6xl">
 						<ScanEye />
 						<p>DefectVision</p>
 					</div>
@@ -34,8 +34,11 @@ export default function Home() {
 						))}
 					</div>
 				</div>
-				<div id="column-2" className="flex-1 flex justify-center items-center">
-					<div className="bg-card p-10 rounded-md shadow-sm w-full">
+				<div
+					id="column-2"
+					className="max-w-[90%] md:max-w-1/2 flex justify-center items-center"
+				>
+					<div className="bg-card md:p-10 rounded-md shadow-sm w-full">
 						<MiniDataTable />
 					</div>
 				</div>

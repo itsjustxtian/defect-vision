@@ -165,11 +165,11 @@ const Page = () => {
 					Sample Fetch
 					</button>*/}
 			</div>
-			<div id="content" className="flex gap-2 flex-grow">
+			<div id="content" className="flex flex-col md:flex-row gap-2 flex-grow">
 				<div id="controls" className="flex-1 flex justify-center">
 					<div
 						id="controls"
-						className="flex flex-col py-8 px-20 text-left justify-center"
+						className="flex flex-col py-8 md:px-20 text-left justify-center"
 					>
 						<h1 className="text-3xl font-bold mb-4">Start Scanning</h1>
 						<p className="text-foreground/70 mb-6">
@@ -229,7 +229,7 @@ const Page = () => {
 						{latestScan ? (
 							<ResultsPreview latestScan={latestScan} />
 						) : (
-							<div className="flex-1 h-[70vh] flex flex-col justify-center items-center bg-white border-2 rounded-lg shadow-lg gap-2 text-gray-600">
+							<div className="flex-1 h-[70vh] flex flex-col justify-center items-center bg-card border-2 rounded-lg shadow-lg gap-2 text-gray-600">
 								<FileSearch size={40} />
 								<p>Your scan will appear here.</p>
 							</div>

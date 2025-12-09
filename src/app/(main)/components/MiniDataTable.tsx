@@ -109,7 +109,7 @@ const MiniDataTable = () => {
 	}
 
 	return (
-		<div className="p-6 w-full">
+		<div className="p-6">
 			<MiniTable columns={columns} data={mostRecentScans} />
 			<p className="text-center pt-6 text-foreground/70">
 				A list of your previous scans.

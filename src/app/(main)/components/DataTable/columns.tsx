@@ -123,7 +123,11 @@ export const columns = (
 
 			const uniqueClassNames = Array.from(new Set(formattedClassNames));
 
-			return <p className="text-defect-text">{uniqueClassNames.join(', ')}</p>;
+			return (
+				<p className="text-defect-text max-w-[450px] overflow-hidden text-ellipsis">
+					{uniqueClassNames.join(', ')}
+				</p>
+			);
 		},
 	},
 	{

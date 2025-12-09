@@ -72,9 +72,19 @@ export const columns: ColumnDef<ScanResult>[] = [
 			const uniqueClassNames = Array.from(new Set(formattedClassNames));
 
 			if (uniqueClassNames.length > 0) {
-				return uniqueClassNames.join(', ');
+				return (
+					<div className="max-w-[500px]">
+						<p className="overflow-hidden text-ellipsis">
+							{uniqueClassNames.join(', ')}
+						</p>
+					</div>
+				);
 			} else {
-				return <p>No defects detected.</p>;
+				return (
+					<div className="overflow-hidden text-ellipsis">
+						<p>No defects detected.</p>
+					</div>
+				);
 			}
 		},
 	},
