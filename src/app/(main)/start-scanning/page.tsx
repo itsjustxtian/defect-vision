@@ -6,6 +6,8 @@ import 'ldrs/react/TailChase.css';
 import ScanSettings from './ScanSettings';
 import { ScanResult } from '../components/MiniDataTable/columns';
 import ResultsPreview from '../components/ResultsPreview';
+import { LineSpinner } from 'ldrs/react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type ApiResponse = {
 	status: string;
@@ -28,6 +30,7 @@ const Page = () => {
 	const [user, setUser] = useState<{ email: string } | null>(null);
 	const [ngrokStatus, setNgrokStatus] = useState('waiting');
 	const [latestScan, setLatestScan] = useState<ScanResult | null>(null);
+	const [spinnerColor, setSpinnerColor] = useState<string | null>(null);
 
 	const checkNgrokStatus = useCallback(async () => {
 		setNgrokStatus('waiting');
@@ -131,6 +134,13 @@ const Page = () => {
 		}
 	};
 
+	useEffect(() => {
+		const color = window.matchMedia('(prefers-color-scheme: dark)').matches
+			? 'white'
+			: 'black';
+		setSpinnerColor(color);
+	}, []);
+
 	return (
 		<div id="page" className="p-10 flex flex-col min-h-[calc(100vh-3.75rem)]">
 			<div id="header" className="flex justify-end pb-6 mb-6 border-b">
@@ -228,6 +238,19 @@ const Page = () => {
 					<div className="flex justify-center items-center">
 						{latestScan ? (
 							<ResultsPreview latestScan={latestScan} />
+						) : loading ? (
+							<div className="flex-1 h-[70vh] flex flex-col justify-center items-center bg-card border-2 rounded-lg shadow-lg gap-2 text-gray-600 space-x-4">
+								<div className="flex space-x-4">
+									<Skeleton className="h-12 w-12 rounded-full" />
+									<div className="space-y-2">
+										<Skeleton className="h-4 w-[250px]" />
+										<Skeleton className="h-4 w-[200px]" />
+									</div>
+								</div>
+								<div>
+									<p>Awaiting results from MongoDB...</p>
+								</div>
+							</div>
 						) : (
 							<div className="flex-1 h-[70vh] flex flex-col justify-center items-center bg-card border-2 rounded-lg shadow-lg gap-2 text-gray-600">
 								<FileSearch size={40} />
